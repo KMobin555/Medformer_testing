@@ -135,16 +135,20 @@ class APAVALoader(Dataset):
         filenames = natsorted(filenames)
         if flag == "TRAIN":
             ids = self.train_ids
-            print("train ids:", ids)
+            # print("train ids:", ids)
+            print("train ids len:", len(ids))
         elif flag == "VAL":
             ids = self.val_ids
-            print("val ids:", ids)
+            # print("val ids:", ids)
+            print("val ids len:", len(ids))
         elif flag == "TEST":
             ids = self.test_ids
-            print("test ids:", ids)
+            # print("test ids:", ids)
+            print("test ids len:", len(ids))
         else:
             ids = subject_label[:, 1]
-            print("all ids:", ids)
+            # print("all ids:", ids)
+            print("all ids len:", len(ids))
 
         for j in range(len(filenames)):
             trial_label = subject_label[j]
@@ -215,16 +219,20 @@ class TDBRAINLoader(Dataset):
         filenames = natsorted(filenames)
         if flag == "TRAIN":
             ids = self.train_ids
-            print("train ids:", ids)
+            # print("train ids:", ids)
+            print("train ids len:", len(ids))
         elif flag == "VAL":
             ids = self.val_ids
-            print("val ids:", ids)
+            # print("val ids:", ids)
+            print("val ids len:", len(ids))
         elif flag == "TEST":
             ids = self.test_ids
-            print("test ids:", ids)
+            # print("test ids:", ids)
+            print("test ids len:", len(ids))
         else:
             ids = subject_label[:, 1]
-            print("all ids:", ids)
+            # print("all ids:", ids)
+            print("all ids len:", len(ids))
 
         for j in range(len(filenames)):
             trial_label = subject_label[j]
@@ -331,16 +339,20 @@ class ADFTDLoader(Dataset):
         filenames = natsorted(filenames)
         if flag == "TRAIN":
             ids = self.train_ids
-            print("train ids:", ids)
+            # print("train ids:", ids)
+            print("train ids len:", len(ids))
         elif flag == "VAL":
             ids = self.val_ids
-            print("val ids:", ids)
+            # print("val ids:", ids)
+            print("val ids len:", len(ids))
         elif flag == "TEST":
             ids = self.test_ids
-            print("test ids:", ids)
+            # print("test ids:", ids)
+            print("test ids len:", len(ids))
         else:
             ids = subject_label[:, 1]
-            print("all ids:", ids)
+            # print("all ids:", ids)
+            print("all ids len:", len(ids))
 
         for j in range(len(filenames)):
             trial_label = subject_label[j]
@@ -436,16 +448,20 @@ class PTBLoader(Dataset):
         filenames = natsorted(filenames)
         if flag == "TRAIN":
             ids = self.train_ids
-            print("train ids:", ids)
+            # print("train ids:", ids)
+            print("train ids len:", len(ids))
         elif flag == "VAL":
             ids = self.val_ids
-            print("val ids:", ids)
+            # print("val ids:", ids)
+            print("val ids len:", len(ids))
         elif flag == "TEST":
             ids = self.test_ids
-            print("test ids:", ids)
+            # print("test ids:", ids)
+            print("test ids len:", len(ids))
         else:
             ids = subject_label[:, 1]
-            print("all ids:", ids)
+            # print("all ids:", ids)
+            print("all ids len:", len(ids))
 
         for j in range(len(filenames)):
             trial_label = subject_label[j]
@@ -567,16 +583,20 @@ class PTBXLLoader(Dataset):
         filenames = natsorted(filenames)
         if flag == "TRAIN":
             ids = self.train_ids
-            print("train ids:", ids)
+            # print("train ids:", ids)
+            print("train ids len:", len(ids))
         elif flag == "VAL":
             ids = self.val_ids
-            print("val ids:", ids)
+            # print("val ids:", ids)
+            print("val ids len:", len(ids))
         elif flag == "TEST":
             ids = self.test_ids
-            print("test ids:", ids)
+            # print("test ids:", ids)
+            print("test ids len:", len(ids))
         else:
             ids = subject_label[:, 1]
-            print("all ids:", ids)
+            # print("all ids:", ids)
+            print("all ids len:", len(ids))
 
         for j in range(len(filenames)):
             trial_label = subject_label[j]
