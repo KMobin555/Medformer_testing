@@ -89,8 +89,8 @@ class Model(nn.Module):
 
         enc_out = self.enc_embedding(x_enc)
 
-        if print_shape:
-            print(enc_out.shape)
+        # if print_shape:
+        #     print(enc_out.shape)
 
         enc_out, attns = self.encoder(enc_out, attn_mask=None)
 
