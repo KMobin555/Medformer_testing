@@ -437,3 +437,71 @@ class MedformerLayer(nn.Module):
         else:
             x_out = x_intra
         return x_out, attn_out
+
+
+# Medixformer layer for new model  
+class MedixformerLayer(nn.Module):
+    def __init__(
+        self,
+        num_blocks,
+        d_model,
+        n_heads,
+        dropout=0.1,
+        output_attention=False,
+        no_inter=False,
+    ):
+        super().__init__()
+
+        self.intra_attentions = nn.ModuleList(
+            [
+                AttentionLayer(
+                    FullAttention(
+                        False,
+                        factor=1,
+                        attention_dropout=dropout,
+                        output_attention=output_attention,
+                    ),
+                    d_model,
+                    n_heads,
+                )
+                for _ in range(num_blocks)
+            ]
+        )
+        if no_inter or num_blocks <= 1:
+            print("No inter attention for time")
+            self.inter_attention = None
+        else:
+            self.inter_attention = AttentionLayer(
+                FullAttention(
+                    False,
+                    factor=1,
+                    attention_dropout=dropout,
+                    output_attention=output_attention,
+                ),
+                d_model,
+                n_heads,
+            )
+
+    def forward(self, x, attn_mask=None, tau=None, delta=None):
+        attn_mask = attn_mask or ([None] * len(x))
+        # Intra attention
+        x_intra = []
+        attn_out = []
+        for x_in, layer, mask in zip(x, self.intra_attentions, attn_mask):
+            _x_out, _attn = layer(x_in, x_in, x_in, attn_mask=mask, tau=tau, delta=delta)
+            x_intra.append(_x_out)  # (B, Li, D)
+            attn_out.append(_attn)
+        if self.inter_attention is not None:
+            # Inter attention
+            routers = torch.cat([x[:, -1:] for x in x_intra], dim=1)  # (B, N, D)
+            x_inter, attn_inter = self.inter_attention(
+                routers, routers, routers, attn_mask=None, tau=tau, delta=delta
+            )
+            x_out = [
+                torch.cat([x[:, :-1], x_inter[:, i : i + 1]], dim=1)  # (B, Li, D)
+                for i, x in enumerate(x_intra)
+            ]
+            attn_out += [attn_inter]
+        else:
+            x_out = x_intra
+        return x_out, attn_out

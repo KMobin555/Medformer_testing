@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from layers.Medformer_EncDec import Encoder, EncoderLayer
-from layers.SelfAttention_Family import MedformerLayer
+from layers.Medixformer_EncDec import Encoder, EncoderLayer
+from layers.SelfAttention_Family import MedixformerLayer
 from layers.Embed import ListPatchEmbedding
 import numpy as np
 
@@ -44,7 +44,7 @@ class Model(nn.Module):
         self.encoder = Encoder(
             [
                 EncoderLayer(
-                    MedformerLayer(
+                    MedixformerLayer(
                         len(patch_len_list),
                         configs.d_model,
                         configs.n_heads,
