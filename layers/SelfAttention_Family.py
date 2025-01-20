@@ -400,7 +400,7 @@ class MedformerLayer(nn.Module):
             ]
         )
         if no_inter or num_blocks <= 1:
-            # print("No inter attention for time")
+            print("No inter attention for time")
             self.inter_attention = None
         else:
             self.inter_attention = AttentionLayer(
