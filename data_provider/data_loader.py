@@ -601,10 +601,13 @@ class PTBXLLoader(Dataset):
         for j in range(len(filenames)):
             trial_label = subject_label[j]
             path = data_path + filenames[j]
+            print("path ", path)
             subject_feature = np.load(path)
+            print("data loader shape ",subject_feature.shape)
             for trial_feature in subject_feature:
                 # load data by ids
                 if j + 1 in ids:  # id starts from 1, not 0.
+                    print('trail shape', trial_feature.shape, " subject feature shape", subject_feature.shape)
                     feature_list.append(trial_feature)
                     label_list.append(trial_label)
         # reshape and shuffle
