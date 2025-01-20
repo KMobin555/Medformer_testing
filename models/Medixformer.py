@@ -85,7 +85,7 @@ class Model(nn.Module):
         # Embedding
         print_shape = True
         if print_shape:
-            print(x_enc.shape)
+            print('input x_enc ', x_enc.shape)
 
         enc_out = self.enc_embedding(x_enc)
 
@@ -95,13 +95,13 @@ class Model(nn.Module):
         enc_out, attns = self.encoder(enc_out, attn_mask=None)
 
         if print_shape:
-            print(enc_out.shape)
+            print('after encoder ', enc_out.shape)
 
         if self.single_channel:
             enc_out = torch.reshape(enc_out, (-1, self.enc_in, *enc_out.shape[-2:]))
 
         if print_shape:
-            print(enc_out.shape)
+            print('after single channel ', enc_out.shape)
 
 
         # Output
@@ -110,24 +110,24 @@ class Model(nn.Module):
         )  # the output transformer encoder/decoder embeddings don't include non-linearity
 
         if print_shape:
-            print(output.shape)
+            print('After activation function ', output.shape)
 
         output = self.dropout(output)
 
         if print_shape:
-            print(output.shape)
+            print("After dropout ",output.shape)
 
         output = output.reshape(
             output.shape[0], -1
         )  # (batch_size, seq_length * d_model)
 
         if print_shape:
-            print(output.shape)
+            print("after reshaping ", output.shape)
 
         output = self.projection(output)  # (batch_size, num_classes)
 
         if print_shape:
-            print(output.shape)
+            print("final output projection ", output.shape)
 
         return output
 
