@@ -83,20 +83,52 @@ class Model(nn.Module):
 
     def classification(self, x_enc, x_mark_enc):
         # Embedding
+        print_shape = True
+        if print_shape:
+            print(x_enc.shape)
+
         enc_out = self.enc_embedding(x_enc)
+
+        if print_shape:
+            print(enc_out.shape)
+
         enc_out, attns = self.encoder(enc_out, attn_mask=None)
+
+        if print_shape:
+            print(enc_out.shape)
+
         if self.single_channel:
             enc_out = torch.reshape(enc_out, (-1, self.enc_in, *enc_out.shape[-2:]))
+
+        if print_shape:
+            print(enc_out.shape)
+
 
         # Output
         output = self.act(
             enc_out
         )  # the output transformer encoder/decoder embeddings don't include non-linearity
+
+        if print_shape:
+            print(output.shape)
+
         output = self.dropout(output)
+
+        if print_shape:
+            print(output.shape)
+
         output = output.reshape(
             output.shape[0], -1
         )  # (batch_size, seq_length * d_model)
+
+        if print_shape:
+            print(output.shape)
+
         output = self.projection(output)  # (batch_size, num_classes)
+
+        if print_shape:
+            print(output.shape)
+
         return output
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
