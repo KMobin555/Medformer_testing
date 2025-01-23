@@ -34,9 +34,21 @@ class Encoder(nn.Module):
 
     def forward(self, x, attn_mask=None, tau=None, delta=None):
         # x [[B, L1, D], [B, L2, D], ...]
+
+        print_pls = True
+        if print_pls:
+            print("(Encoder) attn layers size should be 6 and here is: ", len(self.attn_layers))
         attns = []
+
+        if print_pls:
+            print("input in (Encoder) class x: ", x)
+
         for attn_layer in self.attn_layers:
             x, attn = attn_layer(x, attn_mask=attn_mask, tau=tau, delta=delta)
+
+            if print_pls:
+                print("output in (Encoder) inside the attn_layers loop x: ", x)
+
             attns.append(attn)
 
         # concat all the outputs
@@ -44,7 +56,13 @@ class Encoder(nn.Module):
             x, dim=1
         )  # (batch_size, patch_num_1 + patch_num_2 + ... , d_model)
 
+        if print_pls:
+            print("output before normalization layer inside (Encoder) x: ", x)
+
         if self.norm is not None:
             x = self.norm(x)
+            
+        if print_pls:
+            print("output after normalization layer inside (Encoder) x: ", x)
 
         return x, attns

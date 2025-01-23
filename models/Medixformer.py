@@ -68,7 +68,7 @@ class Model(nn.Module):
             self.projection = nn.Linear(
                 configs.d_model
                 * sum(patch_num_list)
-                * (1 if not self.single_channel else configs.enc_in),
+                * (configs.enc_in if self.single_channel else 1),
                 configs.num_class,
             )
 
@@ -148,3 +148,8 @@ class Model(nn.Module):
             dec_out = self.classification(x_enc, x_mark_enc)
             return dec_out  # [B, N]
         return None
+
+
+
+
+
