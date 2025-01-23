@@ -151,5 +151,14 @@ class Model(nn.Module):
 
 
 
+#---------------------------------------------------------------------------------
+## GitHub commands for ease
 
 
+# git add . 
+# git commit -m "some comments"
+# git push origin main
+
+# git add . && git commit -m "some comments" && git push origin main
+
+#---------------------------------------------------------------------------------

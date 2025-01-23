@@ -41,7 +41,7 @@ class Encoder(nn.Module):
         attns = []
 
         if print_pls:
-            print("input in (Encoder) class x: ", x.shape)
+            print("input in (Encoder) class x: ", x[0].shape)
 
         for attn_layer in self.attn_layers:
             x, attn = attn_layer(x, attn_mask=attn_mask, tau=tau, delta=delta)
