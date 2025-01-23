@@ -41,13 +41,13 @@ class Encoder(nn.Module):
         attns = []
 
         if print_pls:
-            print("input in (Encoder) class x: ", x)
+            print("input in (Encoder) class x: ", x.shape)
 
         for attn_layer in self.attn_layers:
             x, attn = attn_layer(x, attn_mask=attn_mask, tau=tau, delta=delta)
 
             if print_pls:
-                print("output in (Encoder) inside the attn_layers loop x: ", x)
+                print("output in (Encoder) inside the attn_layers loop x: ", x.shape)
 
             attns.append(attn)
 
@@ -57,12 +57,12 @@ class Encoder(nn.Module):
         )  # (batch_size, patch_num_1 + patch_num_2 + ... , d_model)
 
         if print_pls:
-            print("output before normalization layer inside (Encoder) x: ", x)
+            print("output before normalization layer inside (Encoder) x: ", x.shape)
 
         if self.norm is not None:
             x = self.norm(x)
-            
+
         if print_pls:
-            print("output after normalization layer inside (Encoder) x: ", x)
+            print("output after normalization layer inside (Encoder) x: ", x.shape)
 
         return x, attns
