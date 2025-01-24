@@ -57,12 +57,12 @@ class Encoder(nn.Module):
         )  # (batch_size, patch_num_1 + patch_num_2 + ... , d_model)
 
         if print_pls:
-            print("output before normalization layer inside (Encoder) x: and len", x[0].shape , len(x))
+            print("output before normalization layer inside (Encoder) x: and len", x.shape , len(x))
 
         if self.norm is not None:
             x = self.norm(x)
 
         if print_pls:
-            print("output after normalization layer inside (Encoder) x: and len", x[0].shape , len(x))
+            print("output after normalization layer inside (Encoder) x: and len", x.shape , len(x))
 
         return x, attns
