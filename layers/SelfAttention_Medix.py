@@ -6,6 +6,7 @@ from utils.masking import TriangularCausalMask, ProbMask
 from reformer_pytorch import LSHSelfAttention
 from einops import rearrange, repeat
 
+print_all = True
 
 class FullAttention(nn.Module):
     def __init__(
@@ -123,6 +124,8 @@ class MedixformerLayer(nn.Module):
     def forward(self, x, attn_mask=None, tau=None, delta=None):
         attn_mask = attn_mask or ([None] * len(x))
         # Intra attention
+        if print_all:
+            print(f"x len:  {len(x)} and shape of x[0] = {x[0].shape}")
         x_intra = []
         attn_out = []
         for x_in, layer, mask in zip(x, self.intra_attentions, attn_mask):

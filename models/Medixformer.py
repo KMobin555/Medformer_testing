@@ -65,12 +65,28 @@ class Model(nn.Module):
         if self.task_name == "classification":
             self.act = F.gelu
             self.dropout = nn.Dropout(configs.dropout)
-            self.projection = nn.Linear(
+            # self.projection = nn.Linear(
+            #     configs.d_model
+            #     * sum(patch_num_list)
+            #     * (configs.enc_in if self.single_channel else 1),
+            #     configs.num_class,
+            # )
+            # Calculate the initial dimension
+            initial_dim = (
                 configs.d_model
                 * sum(patch_num_list)
-                * (configs.enc_in if self.single_channel else 1),
-                configs.num_class,
+                * (configs.enc_in if self.single_channel else 1)
             )
+
+            # Define the multi-layer projection
+            self.projection = nn.Sequential(
+                nn.Linear(initial_dim, initial_dim // 2),  # Reduce by half
+                nn.ReLU(),
+                nn.Linear(initial_dim // 2, initial_dim // 4),  # Reduce by half again
+                nn.ReLU(),
+                nn.Linear(initial_dim // 4, configs.num_class)  # Final projection to num_class
+            )
+
 
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
         raise NotImplementedError
