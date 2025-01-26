@@ -80,7 +80,9 @@ class Model(nn.Module):
 
             # Define the multi-layer projection
             self.projection = nn.Sequential(
-                nn.Linear(initial_dim, initial_dim // 4),  # Reduce by half
+                nn.Linear(initial_dim, initial_dim // 2),  # Reduce by half
+                nn.ReLU(),
+                nn.Linear(initial_dim // 2, initial_dim // 4),  # Reduce by half again
                 nn.ReLU(),
                 nn.Linear(initial_dim // 4, configs.num_class)  # Final projection to num_class
             )
