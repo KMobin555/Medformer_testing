@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from layers.Medixformer_EncDec import Encoder, EncoderLayer
-from layers.SelfAttention_Family import MedixformerLayer
+from layers.SelfAttention_Medix import MedixformerLayer
 from layers.Embed import ListPatchEmbedding
 import numpy as np
 
