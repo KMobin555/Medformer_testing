@@ -35,7 +35,7 @@ class Encoder(nn.Module):
     def forward(self, x, attn_mask=None, tau=None, delta=None):
         # x [[B, L1, D], [B, L2, D], ...]
 
-        print_pls = True
+        print_pls = False
         if print_pls:
             print("(Encoder) attn layers size should be 6 and here is: ", len(self.attn_layers))
         attns = []

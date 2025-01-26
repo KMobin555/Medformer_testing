@@ -6,7 +6,7 @@ from utils.masking import TriangularCausalMask, ProbMask
 from reformer_pytorch import LSHSelfAttention
 from einops import rearrange, repeat
 
-print_all = True
+print_all = False
 
 class FullAttention(nn.Module):
     def __init__(

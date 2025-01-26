@@ -97,7 +97,7 @@ class Model(nn.Module):
 
     def classification(self, x_enc, x_mark_enc):
         # Embedding
-        print_shape = True
+        print_shape = False
         if print_shape:
             print('input x_enc ', x_enc.shape)
 
