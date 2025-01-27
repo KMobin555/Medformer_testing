@@ -82,6 +82,7 @@ class Model(nn.Module):
         raise NotImplementedError
 
     def classification(self, x_enc, x_mark_enc):
+        print(f'shapes x_enc : {x_enc.shape} and  x_mark_enc = {x_mark_enc.shape}')
         # Embedding
         enc_out = self.enc_embedding(x_enc)
         enc_out, attns = self.encoder(enc_out, attn_mask=None)
