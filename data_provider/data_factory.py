@@ -67,7 +67,7 @@ def data_provider(args, flag):
             args=args,
             flag=flag,
         )
-
+        print("before dataloader ")
         data_loader = DataLoader(
             data_set,
             batch_size=batch_size,
