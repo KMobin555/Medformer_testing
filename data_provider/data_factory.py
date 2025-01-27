@@ -79,6 +79,7 @@ def data_provider(args, flag):
                 x, max_len=args.seq_len
             ),  # only called when yeilding batches
         )
+        print("data loaded") stop
         return data_set, data_loader
     else:
         if args.data == "m4":
