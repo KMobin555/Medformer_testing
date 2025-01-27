@@ -537,7 +537,7 @@ class PTBXLLoader(Dataset):
         hyp_list = list(
             data_list[np.where(data_list[:, 0] == 4)][:, 1]
         )  # Hypertrophy IDs
-
+            
         train_ids = (
             no_list[: int(a * len(no_list))]
             + mi_list[: int(a * len(mi_list))]

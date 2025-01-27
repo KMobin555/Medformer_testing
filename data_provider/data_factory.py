@@ -67,6 +67,7 @@ def data_provider(args, flag):
             args=args,
             flag=flag,
         )
+        print('length of data set', len(data_set))
         print("before dataloader ")
         data_loader = DataLoader(
             data_set,
