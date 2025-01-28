@@ -45,6 +45,7 @@ class Exp_Classification(Exp_Basic):
             model = nn.DataParallel(model, device_ids=self.args.device_ids)
 
         print(model)
+        print(self.args)
         return model
 
     def _get_data(self, flag):
@@ -167,6 +168,8 @@ class Exp_Classification(Exp_Basic):
 
             self.model.train()
             epoch_time = time.time()
+
+            break
 
             for i, (batch_x, label, padding_mask) in enumerate(train_loader):
                 iter_count += 1
