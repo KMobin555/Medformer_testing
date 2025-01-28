@@ -232,7 +232,9 @@ class CrossChannelTokenEmbedding(nn.Module):
                 )
 
     def forward(self, x):
+        print('\n',self.tokenConv)
         x = self.tokenConv(x)
+        print('ffs ',x.shape, '\n')
         return x
 
 
