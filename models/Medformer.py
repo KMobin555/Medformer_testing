@@ -97,6 +97,7 @@ class Model(nn.Module):
         output = output.reshape(
             output.shape[0], -1
         )  # (batch_size, seq_length * d_model)
+        print("shape before projection ", output.shape)
         output = self.projection(output)  # (batch_size, num_classes)
         return output
 
