@@ -43,6 +43,8 @@ class Exp_Classification(Exp_Basic):
         )  # pass args to model
         if self.args.use_multi_gpu and self.args.use_gpu:
             model = nn.DataParallel(model, device_ids=self.args.device_ids)
+
+        print(model)
         return model
 
     def _get_data(self, flag):
