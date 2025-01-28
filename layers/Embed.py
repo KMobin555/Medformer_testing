@@ -273,11 +273,15 @@ class ListPatchEmbedding(nn.Module):
         )
 
     def forward(self, x):  # (batch_size, seq_len, enc_in)
+        print("inside the listpatchembed x shape ", x.shape)
         x = x.permute(0, 2, 1)  # (batch_size, enc_in, seq_len)
+
+        print("inside the listpatchembed x shape 2nd ", x.shape)
         if self.single_channel:
             B, C, L = x.shape
             x = torch.reshape(x, (B * C, 1, L))
 
+        print("inside the listpatchembed x shape 3rd ", x.shape)
         x_list = []
         for padding, value_embedding in zip(self.paddings, self.value_embeddings):
             print(f"before pading x shape : {x.shape}")
