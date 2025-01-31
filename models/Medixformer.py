@@ -7,6 +7,7 @@ from layers.Embed import ListPatchEmbedding
 import numpy as np
 
 
+
 class Model(nn.Module):
     """
     Vanilla Transformer
@@ -65,26 +66,12 @@ class Model(nn.Module):
         if self.task_name == "classification":
             self.act = F.gelu
             self.dropout = nn.Dropout(configs.dropout)
-            # self.projection = nn.Linear(
-            #     configs.d_model
-            #     * sum(patch_num_list)
-            #     * (configs.enc_in if self.single_channel else 1),
-            #     configs.num_class,
-            # )
-            # Calculate the initial dimension
-            initial_dim = (
+            self.projection = nn.Linear(
                 configs.d_model
                 * sum(patch_num_list)
-                * (configs.enc_in if self.single_channel else 1)
+                * (1 if not self.single_channel else configs.enc_in),
+                configs.num_class,
             )
-
-            # Define the multi-layer projection
-            self.projection = nn.Sequential(
-                nn.Linear(initial_dim, initial_dim // 4),  # Reduce by half
-                nn.ReLU(),
-                nn.Linear(initial_dim // 4, configs.num_class)  # Final projection to num_class
-            )
-
 
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
         raise NotImplementedError
@@ -96,53 +83,23 @@ class Model(nn.Module):
         raise NotImplementedError
 
     def classification(self, x_enc, x_mark_enc):
+        # print(f'shapes x_enc : {x_enc.shape} and  x_mark_enc = {x_mark_enc.shape}')
         # Embedding
-        print_shape = False
-        if print_shape:
-            print('input x_enc ', x_enc.shape)
-
         enc_out = self.enc_embedding(x_enc)
-
-        if print_shape:
-            print("len of enc_out : ", len(enc_out))
-
         enc_out, attns = self.encoder(enc_out, attn_mask=None)
-
-        if print_shape:
-            print('after encoder ', enc_out.shape)
-
         if self.single_channel:
             enc_out = torch.reshape(enc_out, (-1, self.enc_in, *enc_out.shape[-2:]))
-
-        if print_shape:
-            print('after single channel ', enc_out.shape)
-
 
         # Output
         output = self.act(
             enc_out
         )  # the output transformer encoder/decoder embeddings don't include non-linearity
-
-        if print_shape:
-            print('After activation function ', output.shape)
-
         output = self.dropout(output)
-
-        if print_shape:
-            print("After dropout ",output.shape)
-
         output = output.reshape(
             output.shape[0], -1
         )  # (batch_size, seq_length * d_model)
-
-        if print_shape:
-            print("after reshaping ", output.shape)
-
+        # print("shape before projection ", output.shape)
         output = self.projection(output)  # (batch_size, num_classes)
-
-        if print_shape:
-            print("final output projection ", output.shape)
-
         return output
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
@@ -162,6 +119,7 @@ class Model(nn.Module):
             dec_out = self.classification(x_enc, x_mark_enc)
             return dec_out  # [B, N]
         return None
+
 
 
 

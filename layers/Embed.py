@@ -236,7 +236,40 @@ class CrossChannelTokenEmbedding(nn.Module):
         x = self.tokenConv(x)
         print('ffs ',x.shape, '\n')
         return x
+    
+class CrossChannelTokenEmbedding_6c(nn.Module):
+    def __init__(self, c_in, l_patch, d_model, stride=None, num_selected_channels=6):
+        super().__init__()
+        if stride is None:
+            stride = l_patch
+        self.num_selected_channels = num_selected_channels  # Number of channels to select
+        
+        self.tokenConv = nn.Conv2d(
+            in_channels=1,
+            out_channels=d_model,
+            kernel_size=(num_selected_channels, l_patch),  # Use selected channels
+            stride=(1, stride),
+            padding=0,
+            padding_mode="circular",
+            bias=False,
+        )
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(
+                    m.weight, mode="fan_in", nonlinearity="leaky_relu"
+                )
 
+    def forward(self, x):
+        # x shape: (batch_size, 1, c_in, seq_len) -> (batch_size, 1, 12, seq_len)
+        
+        batch_size, _, num_channels, seq_len = x.shape
+        selected_channels = torch.randperm(num_channels)[:self.num_selected_channels]  # Randomly select 6 channels
+        
+        x = x[:, :, selected_channels, :]  # Keep only selected channels
+        x = self.tokenConv(x)  # Apply convolution
+
+        return x
+    
 
 class ListPatchEmbedding(nn.Module):
     def __init__(
@@ -256,7 +289,7 @@ class ListPatchEmbedding(nn.Module):
         self.single_channel = single_channel
 
         linear_layers = [
-            CrossChannelTokenEmbedding(
+            CrossChannelTokenEmbedding_6c(
                 c_in=enc_in if not single_channel else 1,
                 l_patch=patch_len,
                 d_model=d_model,
@@ -275,27 +308,27 @@ class ListPatchEmbedding(nn.Module):
         )
 
     def forward(self, x):  # (batch_size, seq_len, enc_in)
-        print("inside the listpatchembed x shape ", x.shape)
+        # print("inside the listpatchembed x shape ", x.shape)
         x = x.permute(0, 2, 1)  # (batch_size, enc_in, seq_len)
 
-        print("inside the listpatchembed x shape 2nd ", x.shape)
+        # print("inside the listpatchembed x shape 2nd ", x.shape)
         if self.single_channel:
             B, C, L = x.shape
             x = torch.reshape(x, (B * C, 1, L))
 
-        print("inside the listpatchembed x shape 3rd ", x.shape)
+        # print("inside the listpatchembed x shape 3rd ", x.shape)
         x_list = []
         for padding, value_embedding in zip(self.paddings, self.value_embeddings):
-            print(f"before pading x shape : {x.shape}")
+            # print(f"before pading x shape : {x.shape}")
             x_new = padding(x).unsqueeze(1)  # (batch_size, 1, enc_in, seq_len+stride)
-            print(f"before value embed x shape : {x_new.shape}")
+            # print(f"before value embed x shape : {x_new.shape}")
             x_new = value_embedding(x_new)  # (batch_size, d_model, 1, patch_num)
-            print(f"before resizing x shape : {x_new.shape}")
+            # print(f"before resizing x shape : {x_new.shape}")
             x_new = x_new.squeeze(2).transpose(1, 2)  # (batch_size, patch_num, d_model)
             # Per patch augmentation
-            print(f"after resizing x shape : {x_new.shape}")
+            # print(f"after resizing x shape : {x_new.shape}")
             aug_idx = random.randint(0, len(self.augmentation) - 1)
-            print(f"before aug x shape : {x_new.shape}")
+            # print(f"before aug x shape : {x_new.shape}")
             
             x_new = self.augmentation[aug_idx](x_new)
             x_list.append(x_new)
