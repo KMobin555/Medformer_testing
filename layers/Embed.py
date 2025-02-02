@@ -289,7 +289,7 @@ class ListPatchEmbedding(nn.Module):
         self.single_channel = single_channel
 
         linear_layers = [
-            CrossChannelTokenEmbedding_6c(
+            CrossChannelTokenEmbedding(
                 c_in=enc_in if not single_channel else 1,
                 l_patch=patch_len,
                 d_model=d_model,
