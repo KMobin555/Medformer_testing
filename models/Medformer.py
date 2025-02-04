@@ -82,7 +82,7 @@ class Model(nn.Module):
         raise NotImplementedError
 
     def classification(self, x_enc, x_mark_enc):
-        print(f'shapes x_enc : {x_enc.shape} and  x_mark_enc = {x_mark_enc.shape}')
+        # print(f'shapes x_enc : {x_enc.shape} and  x_mark_enc = {x_mark_enc.shape}')
         # Embedding
         enc_out = self.enc_embedding(x_enc)
         enc_out, attns = self.encoder(enc_out, attn_mask=None)
@@ -97,7 +97,7 @@ class Model(nn.Module):
         output = output.reshape(
             output.shape[0], -1
         )  # (batch_size, seq_length * d_model)
-        print("shape before projection ", output.shape)
+        # print("shape before projection ", output.shape)
         output = self.projection(output)  # (batch_size, num_classes)
         return output
 
