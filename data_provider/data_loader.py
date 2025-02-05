@@ -870,7 +870,7 @@ class MIMICIVLoader(Dataset):
         X, y = shuffle(X, y, random_state=42)
 
         # print("final length ",len(X))
-        print('y shape ', y.shape)
+        # print('y shape ', y.shape)
 
         return X, y  # only use the first column (label)
 
