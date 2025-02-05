@@ -812,10 +812,10 @@ class MIMICIVLoader(Dataset):
         filenames = []
         # The first column is the label; the second column is the patient ID
         subject_label = np.load(label_path)
-        print("subject_label ", subject_label)
+        # print("subject_label ", subject_label)
         for filename in os.listdir(data_path):
             filenames.append(filename)
-        # filenames = natsorted(filenames)
+        filenames = natsorted(filenames)
         if flag == "TRAIN":
             ids = self.train_ids
             # print("train ids:", ids)
@@ -834,16 +834,16 @@ class MIMICIVLoader(Dataset):
             print("all ids len:", len(ids))
 
 
-        print("ids ",ids)
+        # print("ids ",ids)
 
         for j in filenames:
             # print(j)
             target_value = np.int64(j.split("_")[1].split(".")[0])
-            print(target_value)
+            # print(target_value)
             trial_label = np.where(subject_label[:, 1] == target_value)
             path = data_path + j
             # print("path ", path)
-            # print("trail label ", trial_label)
+            print("trail label ", trial_label)
             subject_feature = np.load(path)
             # print("data loader shape ",subject_feature.shape)
             for trial_feature in subject_feature:
@@ -857,7 +857,7 @@ class MIMICIVLoader(Dataset):
         y = np.array(label_list)
         X, y = shuffle(X, y, random_state=42)
 
-        print("final length ",len(x))
+        print("final length ",len(X))
 
         return X, y[:, 0]  # only use the first column (label)
 
