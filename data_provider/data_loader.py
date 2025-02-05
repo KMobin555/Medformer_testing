@@ -833,7 +833,7 @@ class MIMICIVLoader(Dataset):
             # print("all ids:", ids)
             print("all ids len:", len(ids))
 
-        for j in filename:
+        for j in filenames:
             print(j)
             trial_label = subject_label[j]
             path = data_path + filenames[j]
