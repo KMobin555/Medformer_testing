@@ -812,6 +812,7 @@ class MIMICIVLoader(Dataset):
         filenames = []
         # The first column is the label; the second column is the patient ID
         subject_label = np.load(label_path)
+        print("subject_label ", subject_label)
         for filename in os.listdir(data_path):
             filenames.append(filename)
         filenames = natsorted(filenames)
@@ -833,6 +834,7 @@ class MIMICIVLoader(Dataset):
             print("all ids len:", len(ids))
 
         for j in filename:
+            print(j)
             trial_label = subject_label[j]
             path = data_path + filenames[j]
             # print("path ", path)
