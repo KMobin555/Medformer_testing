@@ -835,6 +835,7 @@ class MIMICIVLoader(Dataset):
 
         for j in filenames:
             print(j)
+            print(j.split("_")[1].split(".")[0])
             trial_label = subject_label[j.split("_")[1].split(".")[0]]
             path = data_path + filenames[j]
             print("path ", path)
