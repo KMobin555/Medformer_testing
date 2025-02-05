@@ -838,7 +838,7 @@ class MIMICIVLoader(Dataset):
             target_value = j.split("_")[1].split(".")[0]
             print(target_value)
             trial_label = np.where(subject_label[:, 1] == target_value)[0]
-            path = data_path + filenames[j]
+            path = data_path + j
             print("path ", path)
             print("trail label ", trial_label)
             subject_feature = np.load(path)
