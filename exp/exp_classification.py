@@ -188,6 +188,7 @@ class Exp_Classification(Exp_Basic):
                         "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(
                             i + 1, epoch + 1, loss.item()
                         )
+                        break
                     )
                     speed = (time.time() - time_now) / iter_count
                     left_time = speed * (
