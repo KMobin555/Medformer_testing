@@ -23,6 +23,7 @@ data_dict = {
     "PTB-XL": PTBXLLoader,  # dataset PTB-XL
     "FLAAP": FLAAPLoader,  # dataset FLAAP
     "UCI-HAR": UCIHARLoader,  # dataset HAR
+    "MIMIC-IV": MIMICIVLoader, # dataset MIMIC-IV
 }
 
 
