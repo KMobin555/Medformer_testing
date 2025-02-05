@@ -7,6 +7,7 @@ from data_provider.data_loader import (
     PTBXLLoader,
     FLAAPLoader,
     UCIHARLoader,
+    MIMICIVLoader,
 )
 from data_provider.uea import collate_fn
 from torch.utils.data import DataLoader
