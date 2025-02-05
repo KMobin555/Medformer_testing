@@ -834,7 +834,7 @@ class MIMICIVLoader(Dataset):
             print("all ids len:", len(ids))
 
         for j in filenames:
-            print("ids ",ids)
+            # print("ids ",ids)
             print(j)
             target_value = j.split("_")[1].split(".")[0]
             print(target_value)
@@ -843,11 +843,11 @@ class MIMICIVLoader(Dataset):
             print("path ", path)
             print("trail label ", trial_label)
             subject_feature = np.load(path)
-            # print("data loader shape ",subject_feature.shape)
+            print("data loader shape ",subject_feature.shape)
             for trial_feature in subject_feature:
                 # load data by ids
-                if j in ids:  # id starts from 1, not 0.
-                    # print('trail shape', trial_feature.shape, " subject feature shape", subject_feature.shape)
+                if target_value in ids:  # id starts from 1, not 0.
+                    print('trail shape', trial_feature.shape, " subject feature shape", subject_feature.shape)
                     feature_list.append(trial_feature)
                     label_list.append(trial_label)
         # reshape and shuffle
