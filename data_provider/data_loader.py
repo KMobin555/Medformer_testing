@@ -869,9 +869,10 @@ class MIMICIVLoader(Dataset):
         y = np.array(label_list)
         X, y = shuffle(X, y, random_state=42)
 
-        print("final length ",len(X))
+        # print("final length ",len(X))
+        print('y shape ', y.shape)
 
-        return X, y[:, 0]  # only use the first column (label)
+        return X, y  # only use the first column (label)
 
     def __getitem__(self, index):
         return torch.from_numpy(self.X[index]), torch.from_numpy(
