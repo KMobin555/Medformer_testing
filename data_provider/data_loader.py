@@ -835,9 +835,10 @@ class MIMICIVLoader(Dataset):
 
         for j in filenames:
             print(j)
-            trial_label = subject_label[j]
+            trial_label = subject_label[j.split("_")[1].split(".")[0]]
             path = data_path + filenames[j]
-            # print("path ", path)
+            print("path ", path)
+            print("trail label ", trial_label)
             subject_feature = np.load(path)
             # print("data loader shape ",subject_feature.shape)
             for trial_feature in subject_feature:
