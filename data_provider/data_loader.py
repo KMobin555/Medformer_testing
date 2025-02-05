@@ -835,15 +835,15 @@ class MIMICIVLoader(Dataset):
 
         for j in filenames:
             # print("ids ",ids)
-            print(j)
+            # print(j)
             target_value = j.split("_")[1].split(".")[0]
-            print(target_value)
+            # print(target_value)
             trial_label = np.where(subject_label[:, 1] == target_value)[0]
             path = data_path + j
-            print("path ", path)
-            print("trail label ", trial_label)
+            # print("path ", path)
+            # print("trail label ", trial_label)
             subject_feature = np.load(path)
-            print("data loader shape ",subject_feature.shape)
+            # print("data loader shape ",subject_feature.shape)
             for trial_feature in subject_feature:
                 # load data by ids
                 if target_value in ids:  # id starts from 1, not 0.
