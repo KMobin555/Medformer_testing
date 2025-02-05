@@ -818,7 +818,7 @@ class MIMICIVLoader(Dataset):
         for filename in os.listdir(data_path):
             filenames.append(filename)
         filenames = natsorted(filenames)
-        
+
         if flag == "TRAIN":
             ids = self.train_ids
             # print("train ids:", ids)
@@ -840,7 +840,7 @@ class MIMICIVLoader(Dataset):
         # print("ids ",ids)
 
         for j in filenames:
-            print(j)
+            # print(j)
             # Extract target_value (patient ID) from filename
             target_value = int(j.split("_")[1].split(".")[0].strip())
             # print("Extracted target_value:", target_value)
