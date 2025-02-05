@@ -818,6 +818,7 @@ class MIMICIVLoader(Dataset):
         for filename in os.listdir(data_path):
             filenames.append(filename)
         filenames = natsorted(filenames)
+        
         if flag == "TRAIN":
             ids = self.train_ids
             # print("train ids:", ids)
