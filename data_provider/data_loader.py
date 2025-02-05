@@ -812,6 +812,8 @@ class MIMICIVLoader(Dataset):
         filenames = []
         # The first column is the label; the second column is the patient ID
         subject_label = np.load(label_path)
+        subject_label[:, 1] = subject_label[:, 1].astype(int)
+
         print("subject_label ", subject_label)
         for filename in os.listdir(data_path):
             filenames.append(filename)
@@ -838,9 +840,17 @@ class MIMICIVLoader(Dataset):
 
         for j in filenames:
             print(j)
-            target_value = np.int64(j.split("_")[1].split(".")[0])
-            print(target_value)
-            trial_label = np.where(subject_label[:, 1] == target_value)[0]
+            # Extract target_value (patient ID) from filename
+            target_value = int(j.split("_")[1].split(".")[0].strip())
+            print("Extracted target_value:", target_value)
+            trial_label_idx = np.where(subject_label[:, 1] == target_value)[0]
+            
+            if len(trial_label_idx) == 0:
+                print(f"Warning: No matching label found for target_value {target_value}")
+                continue
+
+            trial_label = subject_label[trial_label_idx[0], 0]  # Get the first matching label
+        
             path = data_path + j 
             # print("path ", path)
             print("trail label ", trial_label)
@@ -850,7 +860,6 @@ class MIMICIVLoader(Dataset):
                 # load data by ids
                 if target_value in ids:  # id starts from 1, not 0.
                     print('trail shape', trial_feature.shape, " subject feature shape", subject_feature.shape)
-                    break
                     feature_list.append(trial_feature)
                     label_list.append(trial_label)
 
