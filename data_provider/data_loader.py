@@ -807,18 +807,15 @@ class MIMICIVLoader(Dataset):
             X: (num_samples, seq_len, feat_dim) np.array of features
             y: (num_samples, ) np.array of labels
         """
+
         feature_list = []
         label_list = []
         filenames = []
         # The first column is the label; the second column is the patient ID
         subject_label = np.load(label_path)
-        subject_label[:, 1] = subject_label[:, 1].astype(int)
-
-        # print("subject_label ", subject_label)
         for filename in os.listdir(data_path):
             filenames.append(filename)
         filenames = natsorted(filenames)
-
         if flag == "TRAIN":
             ids = self.train_ids
             # print("train ids:", ids)
@@ -836,43 +833,102 @@ class MIMICIVLoader(Dataset):
             # print("all ids:", ids)
             print("all ids len:", len(ids))
 
-
-        # print("ids ",ids)
-
-        for j in filenames:
-            # print(j)
-            # Extract target_value (patient ID) from filename
-            target_value = int(j.split("_")[1].split(".")[0].strip())
-            # print("Extracted target_value:", target_value)
-            trial_label_idx = np.where(subject_label[:, 1] == target_value)[0]
-            
-            if len(trial_label_idx) == 0:
-                print(f"Warning: No matching label found for target_value {target_value}")
-                continue
-
-            trial_label = subject_label[trial_label_idx[0], 0]  # Get the first matching label
-        
-            path = data_path + j 
+        for j in range(len(filenames)):
+            trial_label = subject_label[j]
+            path = data_path + filenames[j]
             # print("path ", path)
-            # print("trail label ", trial_label)
             subject_feature = np.load(path)
             # print("data loader shape ",subject_feature.shape)
             for trial_feature in subject_feature:
                 # load data by ids
-                if target_value in ids:  # id starts from 1, not 0.
+                if j + 1 in ids:  # id starts from 1, not 0.
                     # print('trail shape', trial_feature.shape, " subject feature shape", subject_feature.shape)
                     feature_list.append(trial_feature)
                     label_list.append(trial_label)
-
         # reshape and shuffle
         X = np.array(feature_list)
         y = np.array(label_list)
         X, y = shuffle(X, y, random_state=42)
 
-        # print("final length ",len(X))
-        # print('y shape ', y.shape)
+        return X, y[:, 0]  # only use the first column (label)
 
-        return X, y  # only use the first column (label)
+    # def load_mimiciv(self, data_path, label_path, flag=None):
+    #     """
+    #     Loads mimic-iv data from npy files in data_path based on flag and ids in label_path
+    #     Args:
+    #         data_path: directory of data files
+    #         label_path: directory of label.npy file
+    #         flag: 'train', 'val', or 'test'
+    #     Returns:
+    #         X: (num_samples, seq_len, feat_dim) np.array of features
+    #         y: (num_samples, ) np.array of labels
+    #     """
+        # feature_list = []
+        # label_list = []
+        # filenames = []
+        # # The first column is the label; the second column is the patient ID
+        # subject_label = np.load(label_path)
+        # subject_label[:, 1] = subject_label[:, 1].astype(int)
+
+        # # print("subject_label ", subject_label)
+        # for filename in os.listdir(data_path):
+        #     filenames.append(filename)
+        # filenames = natsorted(filenames)
+
+        # if flag == "TRAIN":
+        #     ids = self.train_ids
+        #     # print("train ids:", ids)
+        #     print("train ids len:", len(ids))
+        # elif flag == "VAL":
+        #     ids = self.val_ids
+        #     # print("val ids:", ids)
+        #     print("val ids len:", len(ids))
+        # elif flag == "TEST":
+        #     ids = self.test_ids
+        #     # print("test ids:", ids)
+        #     print("test ids len:", len(ids))
+        # else:
+        #     ids = subject_label[:, 1]
+        #     # print("all ids:", ids)
+        #     print("all ids len:", len(ids))
+
+
+        # # print("ids ",ids)
+
+        # for j in filenames:
+        #     # print(j)
+        #     # Extract target_value (patient ID) from filename
+        #     target_value = int(j.split("_")[1].split(".")[0].strip())
+        #     # print("Extracted target_value:", target_value)
+        #     trial_label_idx = np.where(subject_label[:, 1] == target_value)[0]
+            
+        #     if len(trial_label_idx) == 0:
+        #         print(f"Warning: No matching label found for target_value {target_value}")
+        #         continue
+
+        #     trial_label = subject_label[trial_label_idx[0], 0]  # Get the first matching label
+        
+        #     path = data_path + j 
+        #     # print("path ", path)
+        #     # print("trail label ", trial_label)
+        #     subject_feature = np.load(path)
+        #     # print("data loader shape ",subject_feature.shape)
+        #     for trial_feature in subject_feature:
+        #         # load data by ids
+        #         if target_value in ids:  # id starts from 1, not 0.
+        #             # print('trail shape', trial_feature.shape, " subject feature shape", subject_feature.shape)
+        #             feature_list.append(trial_feature)
+        #             label_list.append(trial_label)
+
+        # # reshape and shuffle
+        # X = np.array(feature_list)
+        # y = np.array(label_list)
+        # X, y = shuffle(X, y, random_state=42)
+
+        # # print("final length ",len(X))
+        # # print('y shape ', y.shape)
+
+        # return X, y  # only use the first column (label)
 
     def __getitem__(self, index):
         return torch.from_numpy(self.X[index]), torch.from_numpy(
