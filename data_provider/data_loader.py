@@ -833,27 +833,31 @@ class MIMICIVLoader(Dataset):
             # print("all ids:", ids)
             print("all ids len:", len(ids))
 
+
+        print("ids ",ids)
+
         for j in filenames:
-            # print("ids ",ids)
             # print(j)
             target_value = np.int64(j.split("_")[1].split(".")[0])
             print(target_value)
             trial_label = np.where(subject_label[:, 1] == target_value)
             path = data_path + j
             # print("path ", path)
-            print("trail label ", trial_label)
+            # print("trail label ", trial_label)
             subject_feature = np.load(path)
             # print("data loader shape ",subject_feature.shape)
             for trial_feature in subject_feature:
                 # load data by ids
                 if target_value in ids:  # id starts from 1, not 0.
-                    print('trail shape', trial_feature.shape, " subject feature shape", subject_feature.shape)
+                    # print('trail shape', trial_feature.shape, " subject feature shape", subject_feature.shape)
                     feature_list.append(trial_feature)
                     label_list.append(trial_label)
         # reshape and shuffle
         X = np.array(feature_list)
         y = np.array(label_list)
         X, y = shuffle(X, y, random_state=42)
+
+        print("final length ",len(x))
 
         return X, y[:, 0]  # only use the first column (label)
 
