@@ -176,15 +176,15 @@ class Exp_Classification(Exp_Basic):
                 batch_x = batch_x.float().to(self.device)
                 padding_mask = padding_mask.float().to(self.device)
                 label = label.to(self.device)
-                # print(batch_x)
+                print(batch_x)
                 outputs = self.model(batch_x, padding_mask, None, None)
-                # print(outputs,label.long())
+                print(outputs,label.long())
                 loss = criterion(outputs, label.long())
-                # print(loss)
+                print(loss)
                 train_loss.append(loss.item())
 
                 if (i + 1) % 100 == 0:
-                    # break
+                    break
                     print(
                         "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(
                             i + 1, epoch + 1, loss.item()
