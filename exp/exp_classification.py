@@ -180,7 +180,7 @@ class Exp_Classification(Exp_Basic):
                 outputs = self.model(batch_x, padding_mask, None, None)
                 print(outputs,label.long())
                 loss = criterion(outputs, label.long())
-                print(loss)
+                print(loss.item(),'\n')
                 train_loss.append(loss.item())
 
                 if (i + 1) % 100 == 0:
