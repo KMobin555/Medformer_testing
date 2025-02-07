@@ -167,6 +167,7 @@ if __name__ == "__main__":
         "--num_workers", type=int, default=0, help="data loader num workers"
     )
     parser.add_argument("--itr", type=int, default=1, help="experiments times")
+    parser.add_argument("--init_seed", type=int, default=41, help="experiments times")
     parser.add_argument("--train_epochs", type=int, default=10, help="train epochs")
     parser.add_argument(
         "--batch_size", type=int, default=32, help="batch size of train input data"
@@ -248,7 +249,7 @@ if __name__ == "__main__":
 
     if args.is_training:
         for ii in range(args.itr):
-            seed = 41 + ii
+            seed = args.init_seed + ii
             random.seed(seed)
             os.environ["PYTHONHASHSEED"] = str(seed)
             np.random.seed(seed)
