@@ -299,7 +299,7 @@ if __name__ == "__main__":
             torch.cuda.empty_cache()
     else:
         for ii in range(args.itr):
-            seed = 41 + ii
+            seed = args.init_seed + ii
             random.seed(seed)
             os.environ["PYTHONHASHSEED"] = str(seed)
             np.random.seed(seed)
