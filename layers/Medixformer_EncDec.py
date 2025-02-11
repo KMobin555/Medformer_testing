@@ -28,6 +28,7 @@ class EncoderLayer(nn.Module):
         self.attention = attention
         self.resblock1 = ResNetBlock(d_model, d_ff, dropout, activation)
         self.resblock2 = ResNetBlock(d_model, d_ff, dropout, activation)
+        self.resblock3 = ResNetBlock(d_model, d_ff, dropout, activation)
         self.norm1 = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
 
@@ -38,6 +39,7 @@ class EncoderLayer(nn.Module):
         y = x = [self.norm1(_x) for _x in x]
         y = [self.resblock1(_y) for _y in y]
         y = [self.resblock2(_y) for _y in y]
+        y = [self.resblock3(_y) for _y in y]
         
         return y, attn
 
