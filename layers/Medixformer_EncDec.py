@@ -74,7 +74,7 @@ class EncoderLayer(nn.Module):
         y = x = [self.norm1(_x) for _x in x]
         y = [self.resblock1(_y) for _y in y]
         y = [self.resblock2(_y) for _y in y]
-        y = [self.resblock3(_y) for _y in y]
+        # y = [self.resblock3(_y) for _y in y]
 
         # y = [self.pool(_y.transpose(-1, 1)).transpose(-1, 1) for _y in y]  # Avg pooling
         
