@@ -53,15 +53,32 @@ class ResNetBlock(nn.Module):
         # x = self.activation(x)
         return x
 
+class ResNetBlock_type1(nn.Module):
+    def __init__(self, d_model, d_ff, dropout, activation="relu", identity=False):
+        super(ResNetBlock, self).__init__()
+        self.conv1 = nn.Conv1d(in_channels=d_model, out_channels=d_ff, kernel_size=1)
+        self.conv2 = nn.Conv1d(in_channels=d_ff, out_channels=d_model, kernel_size=1)
+        self.norm = nn.LayerNorm(d_model)
+        self.dropout = nn.Dropout(dropout)
+        self.activation = F.relu if activation == "relu" else F.gelu
+    
+    def forward(self, x):
+        residual = x
+        x = self.activation(self.conv1(x.transpose(-1, 1)))
+        x = self.dropout(x)
+        x = self.conv2(x).transpose(-1, 1)
+        x = self.dropout(x)
+        return self.norm(residual + x)
+
 
 class EncoderLayer(nn.Module):
     def __init__(self, attention, d_model, d_ff, dropout, activation="relu"):
         super(EncoderLayer, self).__init__()
         d_ff = d_ff or 4 * d_model
         self.attention = attention
-        self.resblock1 = ResNetBlock(d_model, d_ff, dropout, activation, identity=False)
-        self.resblock2 = ResNetBlock(d_model, d_ff, dropout, activation, identity=True)
-        self.resblock3 = ResNetBlock(d_model, d_ff, dropout, activation, identity=True)
+        self.resblock1 = ResNetBlock_type1(d_model, d_ff, dropout, activation, identity=False)
+        self.resblock2 = ResNetBlock_type1(d_model, d_ff, dropout, activation, identity=True)
+        self.resblock3 = ResNetBlock_type1(d_model, d_ff, dropout, activation, identity=True)
         self.norm1 = nn.LayerNorm(d_model)
         self.norm2 = nn.LayerNorm(d_model)
         self.pool = nn.AvgPool1d(kernel_size=2, stride=2)  # Downsampling before attention
@@ -74,7 +91,7 @@ class EncoderLayer(nn.Module):
         y = x = [self.norm1(_x) for _x in x]
         y = [self.resblock1(_y) for _y in y]
         y = [self.resblock2(_y) for _y in y]
-        # y = [self.resblock3(_y) for _y in y]
+        y = [self.resblock3(_y) for _y in y]
 
         # y = [self.pool(_y.transpose(-1, 1)).transpose(-1, 1) for _y in y]  # Avg pooling
         
