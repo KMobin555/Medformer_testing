@@ -55,7 +55,7 @@ class ResNetBlock(nn.Module):
 
 class ResNetBlock_type1(nn.Module):
     def __init__(self, d_model, d_ff, dropout, activation="relu", identity=False):
-        super(ResNetBlock, self).__init__()
+        super(ResNetBlock_type1, self).__init__()
         self.conv1 = nn.Conv1d(in_channels=d_model, out_channels=d_ff, kernel_size=1)
         self.conv2 = nn.Conv1d(in_channels=d_ff, out_channels=d_model, kernel_size=1)
         self.norm = nn.LayerNorm(d_model)
