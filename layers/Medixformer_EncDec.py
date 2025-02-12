@@ -49,8 +49,8 @@ class ResNetBlock(nn.Module):
             residual = self.residual_bn(residual)
             residual = residual.transpose(-1, 1)
         
-        x = x + residual
-        x = self.activation(x)
+        x = self.norm(x + residual)
+        # x = self.activation(x)
         return x
 
 
