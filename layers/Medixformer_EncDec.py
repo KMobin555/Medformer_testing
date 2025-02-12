@@ -4,21 +4,59 @@ import torch.nn.functional as F
 
 
 class ResNetBlock(nn.Module):
-    def __init__(self, d_model, d_ff, dropout, activation="relu"):
+    def __init__(self, d_model, d_ff, dropout, activation="relu", identity=True):
+        
         super(ResNetBlock, self).__init__()
+
         self.conv1 = nn.Conv1d(in_channels=d_model, out_channels=d_ff, kernel_size=1)
-        self.conv2 = nn.Conv1d(in_channels=d_ff, out_channels=d_model, kernel_size=1)
-        self.norm = nn.LayerNorm(d_model)
+        self.bn1 = nn.BatchNorm1d(d_ff)
+
+        self.conv2 = nn.Conv1d(in_channels=d_ff, out_channels=d_ff, kernel_size=3, padding=1)
+        self.bn2 = nn.BatchNorm1d(d_ff)
+
+        self.conv3 = nn.Conv1d(in_channels=d_ff, out_channels=d_model, kernel_size=1)
+        self.bn3 = nn.BatchNorm1d(d_model)
+
         self.dropout = nn.Dropout(dropout)
         self.activation = F.relu if activation == "relu" else F.gelu
-    
+
+        self.identity = identity
+
+        if not identity:
+            self.residual_conv = nn.Conv1d(in_channels=d_model, out_channels=d_model, kernel_size=1)
+            self.residual_bn = nn.BatchNorm1d(d_model)
+
+        self.norm = nn.LayerNorm(d_model)
+
     def forward(self, x):
         residual = x
-        x = self.activation(self.conv1(x.transpose(-1, 1)))
+
+        # Conv1 → BN → Activation
+        x = self.conv1(x.transpose(-1, 1))
+        x = self.bn1(x)
+        x = self.activation(x)
         x = self.dropout(x)
-        x = self.conv2(x).transpose(-1, 1)
+
+        # Conv2 → BN → Activation
+        x = self.conv2(x)
+        x = self.bn2(x)
+        x = self.activation(x)
         x = self.dropout(x)
-        return self.norm(residual + x)
+
+        # Conv3 → BN
+        x = self.conv3(x)
+        x = self.bn3(x)
+        x = self.dropout(x)
+        x = x.transpose(-1, 1)  # Restore shape
+
+        if not self.identity:
+            residual = self.residual_conv(residual.transpose(-1, 1))  # Apply 1x1 conv
+            residual = self.residual_bn(residual)  # Apply BatchNorm
+            residual = residual.transpose(-1, 1)  # Restore shape
+        
+        x = x + residual
+        x = self.activation(x)
+        return x
 
 
 class EncoderLayer(nn.Module):
@@ -26,9 +64,9 @@ class EncoderLayer(nn.Module):
         super(EncoderLayer, self).__init__()
         d_ff = d_ff or 4 * d_model
         self.attention = attention
-        self.resblock1 = ResNetBlock(d_model, d_ff, dropout, activation)
-        self.resblock2 = ResNetBlock(d_model, d_ff, dropout, activation)
-        self.resblock3 = ResNetBlock(d_model, d_ff, dropout, activation)
+        self.resblock1 = ResNetBlock(d_model, d_ff, dropout, activation, identity=False)
+        self.resblock2 = ResNetBlock(d_model, d_ff, dropout, activation, identity=True)
+        self.resblock3 = ResNetBlock(d_model, d_ff, dropout, activation, identity=True)
         self.norm1 = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
 
@@ -42,6 +80,7 @@ class EncoderLayer(nn.Module):
         y = [self.resblock3(_y) for _y in y]
         
         return y, attn
+
 
 # class EncoderLayer(nn.Module):
 #     def __init__(self, attention, d_model, d_ff, dropout, activation="relu"):
