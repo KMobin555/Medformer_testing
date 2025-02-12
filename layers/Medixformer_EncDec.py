@@ -4,24 +4,21 @@ import torch.nn.functional as F
 
 
 class ResNetBlock(nn.Module):
-    def __init__(self, d_model, d_ff, dropout, activation="relu", identity=True):
-        
+    def __init__(self, d_model, d_ff, dropout, activation="relu", identity=False):
         super(ResNetBlock, self).__init__()
 
         self.conv1 = nn.Conv1d(in_channels=d_model, out_channels=d_ff, kernel_size=1)
         self.bn1 = nn.BatchNorm1d(d_ff)
-
         self.conv2 = nn.Conv1d(in_channels=d_ff, out_channels=d_ff, kernel_size=3, padding=1)
         self.bn2 = nn.BatchNorm1d(d_ff)
-
         self.conv3 = nn.Conv1d(in_channels=d_ff, out_channels=d_model, kernel_size=1)
         self.bn3 = nn.BatchNorm1d(d_model)
 
+        self.pool = nn.MaxPool1d(kernel_size=2, stride=2)  # Downsampling
         self.dropout = nn.Dropout(dropout)
         self.activation = F.relu if activation == "relu" else F.gelu
 
         self.identity = identity
-
         if not identity:
             self.residual_conv = nn.Conv1d(in_channels=d_model, out_channels=d_model, kernel_size=1)
             self.residual_bn = nn.BatchNorm1d(d_model)
@@ -30,29 +27,27 @@ class ResNetBlock(nn.Module):
 
     def forward(self, x):
         residual = x
-
-        # Conv1 → BN → Activation
+        
         x = self.conv1(x.transpose(-1, 1))
         x = self.bn1(x)
         x = self.activation(x)
+        # x = self.pool(x)  # Apply max pooling
         x = self.dropout(x)
 
-        # Conv2 → BN → Activation
         x = self.conv2(x)
         x = self.bn2(x)
         x = self.activation(x)
         x = self.dropout(x)
 
-        # Conv3 → BN
         x = self.conv3(x)
         x = self.bn3(x)
         x = self.dropout(x)
-        x = x.transpose(-1, 1)  # Restore shape
+        x = x.transpose(-1, 1)
 
         if not self.identity:
-            residual = self.residual_conv(residual.transpose(-1, 1))  # Apply 1x1 conv
-            residual = self.residual_bn(residual)  # Apply BatchNorm
-            residual = residual.transpose(-1, 1)  # Restore shape
+            residual = self.residual_conv(residual.transpose(-1, 1))
+            residual = self.residual_bn(residual)
+            residual = residual.transpose(-1, 1)
         
         x = x + residual
         x = self.activation(x)
@@ -68,6 +63,8 @@ class EncoderLayer(nn.Module):
         self.resblock2 = ResNetBlock(d_model, d_ff, dropout, activation, identity=True)
         self.resblock3 = ResNetBlock(d_model, d_ff, dropout, activation, identity=True)
         self.norm1 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(d_model)
+        self.pool = nn.AvgPool1d(kernel_size=2, stride=2)  # Downsampling before attention
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, attn_mask=None, tau=None, delta=None):
@@ -78,9 +75,10 @@ class EncoderLayer(nn.Module):
         y = [self.resblock1(_y) for _y in y]
         y = [self.resblock2(_y) for _y in y]
         y = [self.resblock3(_y) for _y in y]
-        
-        return y, attn
 
+        # y = [self.pool(_y.transpose(-1, 1)).transpose(-1, 1) for _y in y]  # Avg pooling
+        
+        return [self.norm2(_x + _y) for _x, _y in zip(x, y)], attn
 
 # class EncoderLayer(nn.Module):
 #     def __init__(self, attention, d_model, d_ff, dropout, activation="relu"):
