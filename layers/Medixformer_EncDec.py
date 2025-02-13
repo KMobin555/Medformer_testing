@@ -75,6 +75,7 @@ class ResNetBlock_type1(nn.Module):
         if not self.identity:
             residual = self.conv3(residual.transpose(-1, 1))
             residual = residual.transpose(-1, 1)
+            residual = self.dropout(residual)
 
         return self.norm(residual + x)
 
