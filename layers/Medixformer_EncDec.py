@@ -58,9 +58,12 @@ class ResNetBlock_type1(nn.Module):
         super(ResNetBlock_type1, self).__init__()
         self.conv1 = nn.Conv1d(in_channels=d_model, out_channels=d_ff, kernel_size=1)
         self.conv2 = nn.Conv1d(in_channels=d_ff, out_channels=d_model, kernel_size=1)
+        self.conv3 = nn.Conv1d(in_channels=d_model, out_channels=d_model, kernel_size=1)
         self.norm = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
         self.activation = F.relu if activation == "relu" else F.gelu
+
+        self.identity = identity
     
     def forward(self, x):
         residual = x
@@ -68,6 +71,11 @@ class ResNetBlock_type1(nn.Module):
         x = self.dropout(x)
         x = self.conv2(x).transpose(-1, 1)
         x = self.dropout(x)
+
+        if not self.identity:
+            residual = self.conv3(residual.transpose(-1, 1))
+            residual = residual.transpose(-1, 1)
+
         return self.norm(residual + x)
 
 
