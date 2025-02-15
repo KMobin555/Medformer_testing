@@ -351,10 +351,29 @@ class Exp_Classification(Exp_Basic):
             print("now the model path ", model_path)
             if not os.path.exists(model_path):
                 raise Exception("No model found at %s" % model_path)
+            
+            checkpoint = torch.load(model_path, map_location="cpu")  # Load checkpoint safely
+        
             if self.swa:
-                self.swa_model.load_state_dict(torch.load(model_path))
+                model_dict = self.swa_model.state_dict()
             else:
-                self.model.load_state_dict(torch.load(model_path))
+                model_dict = self.model.state_dict()
+
+            # Filter out layers with mismatched shapes
+            filtered_checkpoint = {
+                k: v for k, v in checkpoint.items() if k in model_dict and v.shape == model_dict[k].shape
+            }
+
+            # Update the model dictionary with filtered weights
+            model_dict.update(filtered_checkpoint)
+
+            if self.swa:
+                self.swa_model.load_state_dict(model_dict, strict=False)  # Allow partial loading
+            else:
+                self.model.load_state_dict(model_dict, strict=False)  # Allow partial loading
+
+            print("Model loaded successfully with partial weights (if mismatched layers exist).")
+
 
         criterion = self._select_criterion()
         vali_loss, val_metrics_dict = self.vali(vali_data, vali_loader, criterion)
