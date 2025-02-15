@@ -252,6 +252,8 @@ class Exp_Classification(Exp_Basic):
     def test(self, setting, test=0):
         vali_data, vali_loader = self._get_data(flag="VAL")
         test_data, test_loader = self._get_data(flag="TEST")
+        tem = setting.data
+        setting.data = "MIMIC-IV"
         if test:
             print("loading model")
             path = (
@@ -267,6 +269,8 @@ class Exp_Classification(Exp_Basic):
             )
             model_path = path + "checkpoint.pth"
             print("now the model path ", model_path)
+            setting.data = tem
+            print("setting ", setting)
             if not os.path.exists(model_path):
                 raise Exception("No model found at %s" % model_path)
             if self.swa:
