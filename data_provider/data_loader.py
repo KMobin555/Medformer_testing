@@ -765,32 +765,32 @@ class MIMICIVLoader(Dataset):
         sb_list = list(
             data_list[np.where(data_list[:, 0] == 0)][:, 1]
         )  # Sinus bradycardia IDs
-        st_list = list(
-            data_list[np.where(data_list[:, 0] == 1)][:, 1]
-        )  # Sinus tachycardia IDs
-        af_list = list(
-            data_list[np.where(data_list[:, 0] == 2)][:, 1]
-        )  # Atrial fibrillation IDs
+        # st_list = list(
+        #     data_list[np.where(data_list[:, 0] == 1)][:, 1]
+        # )  # Sinus tachycardia IDs
+        # af_list = list(
+        #     data_list[np.where(data_list[:, 0] == 2)][:, 1]
+        # )  # Atrial fibrillation IDs
         no_list = list(
             data_list[np.where(data_list[:, 0] == 3)][:, 1]
         )  # Normal ECG IDs
             
         train_ids = (
             sb_list[: int(a * len(sb_list))]
-            + st_list[: int(a * len(st_list))]
-            + af_list[: int(a * len(af_list))]
+            # + st_list[: int(a * len(st_list))]
+            # + af_list[: int(a * len(af_list))]
             + no_list[: int(a * len(no_list))]
         )
         val_ids = (
             sb_list[int(a * len(sb_list)) : int(b * len(sb_list))]
-            + st_list[int(a * len(st_list)) : int(b * len(st_list))]
-            + af_list[int(a * len(af_list)) : int(b * len(af_list))]
+            # + st_list[int(a * len(st_list)) : int(b * len(st_list))]
+            # + af_list[int(a * len(af_list)) : int(b * len(af_list))]
             + no_list[int(a * len(no_list)) : int(b * len(no_list))]
         )
         test_ids = (
             sb_list[int(b * len(sb_list)) :]
-            + st_list[int(b * len(st_list)) :]
-            + af_list[int(b * len(af_list)) :]
+            # + st_list[int(b * len(st_list)) :]
+            # + af_list[int(b * len(af_list)) :]
             + no_list[int(b * len(no_list)) :]
         )
 
