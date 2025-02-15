@@ -266,6 +266,7 @@ class Exp_Classification(Exp_Basic):
                 + "/"
             )
             model_path = path + "checkpoint.pth"
+            print("now the model path ", model_path)
             if not os.path.exists(model_path):
                 raise Exception("No model found at %s" % model_path)
             if self.swa:
