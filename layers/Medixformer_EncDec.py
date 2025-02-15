@@ -87,7 +87,7 @@ class EncoderLayer(nn.Module):
         super(EncoderLayer, self).__init__()
         d_ff = d_ff or 4 * d_model
         self.attention = attention
-        self.resblock1 = ResNetBlock_type1(d_model, d_ff, dropout, activation, identity=True)
+        self.resblock1 = ResNetBlock_type1(d_model, d_ff, dropout, activation, identity=False)
         self.resblock2 = ResNetBlock_type1(d_model, d_ff, dropout, activation, identity=True)
         self.resblock3 = ResNetBlock_type1(d_model, d_ff, dropout, activation, identity=True)
         self.norm1 = nn.LayerNorm(d_model)
