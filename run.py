@@ -32,6 +32,9 @@ if __name__ == "__main__":
         "--model_id", type=str, required=True, default="test", help="model id"
     )
     parser.add_argument(
+        "--saved_model", type=str, default="test", help="model id"
+    )
+    parser.add_argument(
         "--model",
         type=str,
         required=True,
@@ -338,5 +341,6 @@ if __name__ == "__main__":
             print(
                 ">>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<".format(setting)
             )
-            exp.test(setting, test=1)
+            exp.test_only(setting, 
+                args.saved_model, test=1)
             torch.cuda.empty_cache()
