@@ -347,7 +347,8 @@ class Exp_Classification(Exp_Basic):
                 + setting
                 + "/"
             )
-            model_path = saved_model + "checkpoint.pth"
+            # model_path = saved_model + "checkpoint.pth"
+            model_path = saved_model
             print("now the model path ", model_path)
             if not os.path.exists(model_path):
                 raise Exception("No model found at %s" % model_path)
