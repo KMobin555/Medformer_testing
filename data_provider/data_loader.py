@@ -528,36 +528,36 @@ class PTBXLLoader(Dataset):
         mi_list = list(
             data_list[np.where(data_list[:, 0] == 1)][:, 1]
         )  # Myocardial Infarction IDs
-        sttc_list = list(
-            data_list[np.where(data_list[:, 0] == 2)][:, 1]
-        )  # ST/T Change IDs
-        cd_list = list(
-            data_list[np.where(data_list[:, 0] == 3)][:, 1]
-        )  # Conduction Disturbance IDs
-        hyp_list = list(
-            data_list[np.where(data_list[:, 0] == 4)][:, 1]
-        )  # Hypertrophy IDs
+        # sttc_list = list(
+        #     data_list[np.where(data_list[:, 0] == 2)][:, 1]
+        # )  # ST/T Change IDs
+        # cd_list = list(
+        #     data_list[np.where(data_list[:, 0] == 3)][:, 1]
+        # )  # Conduction Disturbance IDs
+        # hyp_list = list(
+        #     data_list[np.where(data_list[:, 0] == 4)][:, 1]
+        # )  # Hypertrophy IDs
             
         train_ids = (
             no_list[: int(a * len(no_list))]
             + mi_list[: int(a * len(mi_list))]
-            + sttc_list[: int(a * len(sttc_list))]
-            + cd_list[: int(a * len(cd_list))]
-            + hyp_list[: int(a * len(hyp_list))]
+            # + sttc_list[: int(a * len(sttc_list))]
+            # + cd_list[: int(a * len(cd_list))]
+            # + hyp_list[: int(a * len(hyp_list))]
         )
         val_ids = (
             no_list[int(a * len(no_list)) : int(b * len(no_list))]
             + mi_list[int(a * len(mi_list)) : int(b * len(mi_list))]
-            + sttc_list[int(a * len(sttc_list)) : int(b * len(sttc_list))]
-            + cd_list[int(a * len(cd_list)) : int(b * len(cd_list))]
-            + hyp_list[int(a * len(hyp_list)) : int(b * len(hyp_list))]
+            # + sttc_list[int(a * len(sttc_list)) : int(b * len(sttc_list))]
+            # + cd_list[int(a * len(cd_list)) : int(b * len(cd_list))]
+            # + hyp_list[int(a * len(hyp_list)) : int(b * len(hyp_list))]
         )
         test_ids = (
             no_list[int(b * len(no_list)) :]
             + mi_list[int(b * len(mi_list)) :]
-            + sttc_list[int(b * len(sttc_list)) :]
-            + cd_list[int(b * len(cd_list)) :]
-            + hyp_list[int(b * len(hyp_list)) :]
+            # + sttc_list[int(b * len(sttc_list)) :]
+            # + cd_list[int(b * len(cd_list)) :]
+            # + hyp_list[int(b * len(hyp_list)) :]
         )
 
         return train_ids, val_ids, test_ids
