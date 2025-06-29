@@ -149,7 +149,7 @@ class ECGMambaClassifier(nn.Module):
     """
     def __init__(
         self,
-        input_size: int = 1,  # Number of ECG leads
+        input_size: int = 12,  # Number of ECG leads
         d_model: int = 128,
         n_layers: int = 6,
         num_classes: int = 5,  # Number of arrhythmia classes
