@@ -169,6 +169,7 @@ class Model(nn.Module):
     """
     def __init__(
         self,
+        configs,
         input_size: int = 12,  # 12-lead ECG
         sequence_length: int = 300,
         d_model: int = 256,
@@ -185,7 +186,7 @@ class Model(nn.Module):
         self.input_size = input_size
         self.sequence_length = sequence_length
         self.d_model = d_model
-        self.num_classes = num_classes
+        self.num_classes = configs.num_classes
         
         # Input embedding
         self.input_embedding = nn.Linear(input_size, d_model)
