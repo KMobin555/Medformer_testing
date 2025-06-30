@@ -1,5 +1,5 @@
 import torch
-from models.CardioMamba import ECGMamba2Classifier
+from models.CardioMamba_testing import ECGMamba2Classifier
 # Create dummy input with shape [16, 300, 12]
 dummy_input = torch.randn(16, 300, 12)  # batch_size=16, sequence_length=300, feature_dim=12
 

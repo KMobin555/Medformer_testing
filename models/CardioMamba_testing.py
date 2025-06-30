@@ -162,7 +162,7 @@ class Mamba2Block(nn.Module):
         
         return x
 
-class Model(nn.Module):
+class ECGMamba2Classifier(nn.Module):
     """
     Mamba-2 based ECG multi-class classifier
     Designed for ECG data shape: [batch_size, 300, 12] (12-lead ECG)
@@ -253,14 +253,14 @@ class Model(nn.Module):
         
         # Global pooling (you can also try attention pooling)
         # Option 1: Mean pooling
-        x = x.mean(dim=1)
+        # x = x.mean(dim=1)
         
         # Option 2: Max pooling (uncomment to use)
         # x = x.max(dim=1)[0]
         
         # Option 3: Attention pooling (uncomment to use)
-        # attention_weights = torch.softmax(x.mean(dim=-1), dim=1)
-        # x = (x * attention_weights.unsqueeze(-1)).sum(dim=1)
+        attention_weights = torch.softmax(x.mean(dim=-1), dim=1)
+        x = (x * attention_weights.unsqueeze(-1)).sum(dim=1)
         
         # Classification
         logits = self.classifier(x)
