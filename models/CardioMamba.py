@@ -237,7 +237,7 @@ class Model(nn.Module):
         """
         x: (batch_size, sequence_length, input_size) = (batch_size, 300, 12)
         """
-        print("shape -> ", x.shape)
+        # print("shape -> ", x.shape)
         batch_size, seq_len, _ = x.shape
         
         # Input embedding
