@@ -233,7 +233,7 @@ class Model(nn.Module):
             torch.nn.init.zeros_(module.bias)
             torch.nn.init.ones_(module.weight)
     
-    def forward(self, x):
+    def forward(self, x, a, b, c):
         """
         x: (batch_size, sequence_length, input_size) = (batch_size, 300, 12)
         """
