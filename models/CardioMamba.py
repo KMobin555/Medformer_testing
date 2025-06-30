@@ -6,203 +6,261 @@ import numpy as np
 from typing import Optional, Tuple
 import math
 
-class MambaBlock(nn.Module):
+class SSD(nn.Module):
     """
-    Mamba block implementation for sequential modeling
+    Structured State Space Duality (SSD) - Core of Mamba-2
     """
-    def __init__(self, d_model: int, d_state: int = 16, d_conv: int = 4, expand: int = 2):
+    def __init__(self, d_model: int, d_state: int = 64, d_head: int = 64, num_heads: int = 1):
         super().__init__()
         self.d_model = d_model
         self.d_state = d_state
-        self.d_conv = d_conv
-        self.expand = expand
+        self.d_head = d_head
+        self.num_heads = num_heads
         
-        d_inner = int(self.expand * d_model)
+        # Multi-head setup
+        self.d_inner = d_head * num_heads
         
-        # Input projection
-        self.in_proj = nn.Linear(d_model, d_inner * 2, bias=False)
+        # Input projections
+        self.in_proj = nn.Linear(d_model, self.d_inner * 2 + 2 * d_state, bias=False)
         
-        # Convolution layer
+        # Convolution for local processing
         self.conv1d = nn.Conv1d(
-            in_channels=d_inner,
-            out_channels=d_inner,
-            kernel_size=d_conv,
-            bias=True,
-            padding=d_conv - 1,
-            groups=d_inner,
+            in_channels=self.d_inner,
+            out_channels=self.d_inner,
+            kernel_size=4,
+            padding=3,
+            groups=self.d_inner
         )
         
-        # SSM parameters
-        self.x_proj = nn.Linear(d_inner, d_state * 2, bias=False)
-        self.dt_proj = nn.Linear(d_inner, d_inner, bias=True)
-        
-        # Initialize A parameter (diagonal state matrix)
-        A = torch.arange(1, d_state + 1, dtype=torch.float32).repeat(d_inner, 1)
-        self.A_log = nn.Parameter(torch.log(A))
-        
-        # Initialize D parameter (skip connection)
-        self.D = nn.Parameter(torch.ones(d_inner))
-        
-        # Output projection
-        self.out_proj = nn.Linear(d_inner, d_model, bias=False)
+        # State space parameters
+        self.A = nn.Parameter(torch.randn(num_heads, d_head, d_state))
         
         # Normalization
-        self.norm = nn.LayerNorm(d_model)
-        
-    def forward(self, x):
-        """
-        x: (batch, length, dim)
-        """
-        batch, length, dim = x.shape
-        
-        # Skip connection
-        residual = x
-        
-        # Input projection
-        xz = self.in_proj(x)  # (batch, length, 2 * d_inner)
-        x, z = xz.chunk(2, dim=-1)  # (batch, length, d_inner)
-        
-        # Convolution
-        x = x.transpose(-1, -2)  # (batch, d_inner, length)
-        x = self.conv1d(x)[..., :length]  # Remove padding
-        x = x.transpose(-1, -2)  # (batch, length, d_inner)
-        
-        # SiLU activation
-        x = F.silu(x)
-        
-        # SSM operation
-        y = self.ssm(x)
-        
-        # Gating mechanism
-        y = y * F.silu(z)
+        self.norm = nn.LayerNorm(self.d_inner)
         
         # Output projection
-        output = self.out_proj(y)
+        self.out_proj = nn.Linear(self.d_inner, d_model, bias=False)
         
-        # Residual connection and normalization
-        return self.norm(output + residual)
+        # Initialize parameters
+        self._init_parameters()
     
-    def ssm(self, x):
+    def _init_parameters(self):
+        # Initialize A matrix for stability
+        with torch.no_grad():
+            A = torch.arange(1, self.d_state + 1, dtype=torch.float32)
+            A = A.unsqueeze(0).unsqueeze(0).repeat(self.num_heads, self.d_head, 1)
+            self.A.copy_(-torch.log(A))
+    
+    def forward(self, x):
         """
-        Selective State Space Model computation
+        x: (batch, seq_len, d_model)
         """
-        batch, length, d_inner = x.shape
+        batch_size, seq_len, _ = x.shape
         
-        # Get SSM parameters
-        delta, B, C = self.x_proj(x).split([d_inner, self.d_state, self.d_state], dim=-1)
+        # Input projection
+        xBC = self.in_proj(x)  # (batch, seq_len, d_inner * 2 + 2 * d_state)
         
-        # Apply dt projection and softplus
-        delta = F.softplus(self.dt_proj(delta))
+        # Split projections
+        split_sizes = [self.d_inner, self.d_inner, self.d_state, self.d_state]
+        x, z, B, C = torch.split(xBC, split_sizes, dim=-1)
         
-        # Get A matrix
-        A = -torch.exp(self.A_log.float())  # (d_inner, d_state)
+        # Convolution for local context
+        x_conv = x.transpose(-1, -2)  # (batch, d_inner, seq_len)
+        x_conv = self.conv1d(x_conv)[:, :, :seq_len]  # Remove padding
+        x = x_conv.transpose(-1, -2)  # (batch, seq_len, d_inner)
         
-        # Discretize continuous parameters
-        deltaA = torch.exp(torch.einsum('bld,nd->bldn', delta, A))
-        deltaB_u = torch.einsum('bld,bln->bldn', delta, B) * x.unsqueeze(-1)
+        # Apply activation
+        x = F.silu(x)
         
-        # Selective scan
-        last_state = None
+        # Reshape for multi-head processing
+        x = x.view(batch_size, seq_len, self.num_heads, self.d_head)
+        
+        # State space computation
+        y = self.ssd_scan(x, B, C)
+        
+        # Reshape back
+        y = y.view(batch_size, seq_len, self.d_inner)
+        
+        # Gating
+        y = y * F.silu(z)
+        
+        # Normalization and output projection
+        y = self.norm(y)
+        return self.out_proj(y)
+    
+    def ssd_scan(self, x, B, C):
+        """
+        Structured State Space Duality scan
+        """
+        batch_size, seq_len, num_heads, d_head = x.shape
+        
+        # Get discrete A matrix
+        A = -torch.exp(self.A)  # (num_heads, d_head, d_state)
+        
+        # Initialize state
+        h = torch.zeros(batch_size, num_heads, d_head, self.d_state, device=x.device, dtype=x.dtype)
+        
         outputs = []
-        
-        for i in range(length):
-            if last_state is None:
-                state = deltaB_u[:, i]  # (batch, d_inner, d_state)
-            else:
-                state = last_state * deltaA[:, i] + deltaB_u[:, i]
+        for t in range(seq_len):
+            # Current input and projections
+            x_t = x[:, t]  # (batch_size, num_heads, d_head)
+            B_t = B[:, t]  # (batch_size, d_state)
+            C_t = C[:, t]  # (batch_size, d_state)
             
-            y = torch.einsum('bdn,bn->bd', state, C[:, i])
-            outputs.append(y)
-            last_state = state
+            # Discretize A matrix
+            A_discrete = torch.exp(A.unsqueeze(0))  # (1, num_heads, d_head, d_state)
+            
+            # Update state: h = A * h + B * x
+            # Broadcast B_t and x_t for the update
+            B_expanded = B_t.unsqueeze(1).unsqueeze(1)  # (batch_size, 1, 1, d_state)
+            x_expanded = x_t.unsqueeze(-1)  # (batch_size, num_heads, d_head, 1)
+            
+            h = h * A_discrete + B_expanded * x_expanded
+            
+            # Compute output: y = C * h
+            # Sum over state dimension
+            C_expanded = C_t.unsqueeze(1).unsqueeze(1).unsqueeze(-1)  # (batch_size, 1, 1, d_state, 1)
+            y_t = (h.unsqueeze(-1) * C_expanded).sum(dim=3).squeeze(-1)  # (batch_size, num_heads, d_head)
+            
+            outputs.append(y_t)
         
-        y = torch.stack(outputs, dim=1)  # (batch, length, d_inner)
-        
-        # Add skip connection
-        y = y + x * self.D.unsqueeze(0).unsqueeze(0)
-        
-        return y
-    
+        return torch.stack(outputs, dim=1)  # (batch_size, seq_len, num_heads, d_head)
 
-class PositionalEncoding(nn.Module):
+class Mamba2Block(nn.Module):
     """
-    Positional encoding for sequence data
+    Mamba-2 Block with improved architecture
     """
-    def __init__(self, d_model: int, max_len: int = 5000):
+    def __init__(self, d_model: int, d_state: int = 64, d_head: int = 64, num_heads: int = 1, 
+                 expand_factor: int = 2, dropout: float = 0.1):
         super().__init__()
         
-        pe = torch.zeros(max_len, d_model)
-        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        self.d_model = d_model
+        self.norm1 = nn.LayerNorm(d_model)
         
-        pe[:, 0::2] = torch.sin(position * div_term)
-        pe[:, 1::2] = torch.cos(position * div_term)
-        pe = pe.unsqueeze(0).transpose(0, 1)
+        # SSD layer
+        self.ssd = SSD(d_model, d_state, d_head, num_heads)
         
-        self.register_buffer('pe', pe)
+        # Feed-forward network
+        self.norm2 = nn.LayerNorm(d_model)
+        d_ff = expand_factor * d_model
+        self.ffn = nn.Sequential(
+            nn.Linear(d_model, d_ff),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(d_ff, d_model),
+            nn.Dropout(dropout)
+        )
         
+        self.dropout = nn.Dropout(dropout)
+    
     def forward(self, x):
-        return x + self.pe[:x.size(1), :].transpose(0, 1)
+        # SSD with residual connection
+        x = x + self.dropout(self.ssd(self.norm1(x)))
+        
+        # FFN with residual connection
+        x = x + self.dropout(self.ffn(self.norm2(x)))
+        
+        return x
 
-class ECGMambaClassifier(nn.Module):
+class ECGMamba2Classifier(nn.Module):
     """
-    Mamba-based ECG classification model
+    Mamba-2 based ECG multi-class classifier
+    Designed for ECG data shape: [batch_size, 300, 12] (12-lead ECG)
     """
     def __init__(
         self,
-        input_size: int = 12,  # Number of ECG leads
-        d_model: int = 128,
-        n_layers: int = 6,
-        num_classes: int = 5,  # Number of arrhythmia classes
-        d_state: int = 16,
-        d_conv: int = 4,
-        expand: int = 2,
+        input_size: int = 12,  # 12-lead ECG
+        sequence_length: int = 300,
+        d_model: int = 256,
+        d_state: int = 64,
+        d_head: int = 64,
+        num_heads: int = 4,
+        num_layers: int = 8,
+        num_classes: int = 10,  # Set to your number of classes
+        expand_factor: int = 2,
         dropout: float = 0.1
     ):
         super().__init__()
         
         self.input_size = input_size
+        self.sequence_length = sequence_length
         self.d_model = d_model
         self.num_classes = num_classes
         
         # Input embedding
-        self.input_proj = nn.Linear(input_size, d_model)
+        self.input_embedding = nn.Linear(input_size, d_model)
         
-        # Positional encoding (optional for ECG)
-        self.pos_encoding = PositionalEncoding(d_model, max_len=5000)
+        # Positional encoding
+        self.pos_encoding = nn.Parameter(torch.randn(1, sequence_length, d_model) * 0.02)
         
-        # Mamba layers
+        # Mamba-2 layers
         self.layers = nn.ModuleList([
-            MambaBlock(d_model, d_state, d_conv, expand)
-            for _ in range(n_layers)
+            Mamba2Block(
+                d_model=d_model,
+                d_state=d_state,
+                d_head=d_head,
+                num_heads=num_heads,
+                expand_factor=expand_factor,
+                dropout=dropout
+            ) for _ in range(num_layers)
         ])
         
-        # Dropout
-        self.dropout = nn.Dropout(dropout)
+        # Final normalization
+        self.final_norm = nn.LayerNorm(d_model)
         
         # Classification head
         self.classifier = nn.Sequential(
-            nn.LayerNorm(d_model),
-            nn.Linear(d_model, d_model // 2),
-            nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(d_model // 2, num_classes)
+            nn.Linear(d_model, d_model // 2),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(d_model // 2, d_model // 4),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(d_model // 4, num_classes)
         )
         
+        # Initialize weights
+        self.apply(self._init_weights)
+    
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
+            if module.bias is not None:
+                torch.nn.init.zeros_(module.bias)
+        elif isinstance(module, nn.LayerNorm):
+            torch.nn.init.zeros_(module.bias)
+            torch.nn.init.ones_(module.weight)
+    
     def forward(self, x):
         """
-        x: (batch, sequence_length, input_size)
+        x: (batch_size, sequence_length, input_size) = (batch_size, 300, 12)
         """
-        # Input projection
-        x = self.input_proj(x)
-        x = self.pos_encoding(x)
-        x = self.dropout(x)
+        batch_size, seq_len, _ = x.shape
         
-        # Pass through Mamba layers
+        # Input embedding
+        x = self.input_embedding(x)  # (batch_size, 300, d_model)
+        
+        # Add positional encoding
+        x = x + self.pos_encoding[:, :seq_len, :]
+        
+        # Pass through Mamba-2 layers
         for layer in self.layers:
             x = layer(x)
         
-        # Global average pooling
-        x = x.mean(dim=1)  # (batch, d_model)
+        # Final normalization
+        x = self.final_norm(x)
+        
+        # Global pooling (you can also try attention pooling)
+        # Option 1: Mean pooling
+        x = x.mean(dim=1)
+        
+        # Option 2: Max pooling (uncomment to use)
+        # x = x.max(dim=1)[0]
+        
+        # Option 3: Attention pooling (uncomment to use)
+        # attention_weights = torch.softmax(x.mean(dim=-1), dim=1)
+        # x = (x * attention_weights.unsqueeze(-1)).sum(dim=1)
         
         # Classification
         logits = self.classifier(x)
