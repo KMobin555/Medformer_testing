@@ -186,7 +186,7 @@ class Model(nn.Module):
         self.input_size = input_size
         self.sequence_length = sequence_length
         self.d_model = d_model
-        self.num_classes = configs.num_classes
+        self.num_classes = configs.num_classe
         
         # Input embedding
         self.input_embedding = nn.Linear(input_size, d_model)
