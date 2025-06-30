@@ -385,7 +385,7 @@ class PTBLoader(Dataset):
         self.data_path = os.path.join(root_path, "Feature/")
         self.label_path = os.path.join(root_path, "Label/label.npy")
 
-        a, b = 0.55, 0.7
+        a, b = 0.055, 0.07
 
         # list of IDs for training, val, and test sets
         self.train_ids, self.val_ids, self.test_ids = self.load_train_val_test_list(
@@ -528,36 +528,36 @@ class PTBXLLoader(Dataset):
         mi_list = list(
             data_list[np.where(data_list[:, 0] == 1)][:, 1]
         )  # Myocardial Infarction IDs
-        # sttc_list = list(
-        #     data_list[np.where(data_list[:, 0] == 2)][:, 1]
-        # )  # ST/T Change IDs
-        # cd_list = list(
-        #     data_list[np.where(data_list[:, 0] == 3)][:, 1]
-        # )  # Conduction Disturbance IDs
-        # hyp_list = list(
-        #     data_list[np.where(data_list[:, 0] == 4)][:, 1]
-        # )  # Hypertrophy IDs
+        sttc_list = list(
+            data_list[np.where(data_list[:, 0] == 2)][:, 1]
+        )  # ST/T Change IDs
+        cd_list = list(
+            data_list[np.where(data_list[:, 0] == 3)][:, 1]
+        )  # Conduction Disturbance IDs
+        hyp_list = list(
+            data_list[np.where(data_list[:, 0] == 4)][:, 1]
+        )  # Hypertrophy IDs
             
         train_ids = (
             no_list[: int(a * len(no_list))]
             + mi_list[: int(a * len(mi_list))]
-            # + sttc_list[: int(a * len(sttc_list))]
-            # + cd_list[: int(a * len(cd_list))]
-            # + hyp_list[: int(a * len(hyp_list))]
+            + sttc_list[: int(a * len(sttc_list))]
+            + cd_list[: int(a * len(cd_list))]
+            + hyp_list[: int(a * len(hyp_list))]
         )
         val_ids = (
             no_list[int(a * len(no_list)) : int(b * len(no_list))]
             + mi_list[int(a * len(mi_list)) : int(b * len(mi_list))]
-            # + sttc_list[int(a * len(sttc_list)) : int(b * len(sttc_list))]
-            # + cd_list[int(a * len(cd_list)) : int(b * len(cd_list))]
-            # + hyp_list[int(a * len(hyp_list)) : int(b * len(hyp_list))]
+            + sttc_list[int(a * len(sttc_list)) : int(b * len(sttc_list))]
+            + cd_list[int(a * len(cd_list)) : int(b * len(cd_list))]
+            + hyp_list[int(a * len(hyp_list)) : int(b * len(hyp_list))]
         )
         test_ids = (
             no_list[int(b * len(no_list)) :]
             + mi_list[int(b * len(mi_list)) :]
-            # + sttc_list[int(b * len(sttc_list)) :]
-            # + cd_list[int(b * len(cd_list)) :]
-            # + hyp_list[int(b * len(hyp_list)) :]
+            + sttc_list[int(b * len(sttc_list)) :]
+            + cd_list[int(b * len(cd_list)) :]
+            + hyp_list[int(b * len(hyp_list)) :]
         )
 
         return train_ids, val_ids, test_ids
@@ -768,30 +768,30 @@ class MIMICIVLoader(Dataset):
         st_list = list(
             data_list[np.where(data_list[:, 0] == 1)][:, 1]
         )  # Sinus tachycardia IDs
-        # af_list = list(
-        #     data_list[np.where(data_list[:, 0] == 2)][:, 1]
-        # )  # Atrial fibrillation IDs
-        # no_list = list(
-        #     data_list[np.where(data_list[:, 0] == 3)][:, 1]
-        # )  # Normal ECG IDs
+        af_list = list(
+            data_list[np.where(data_list[:, 0] == 2)][:, 1]
+        )  # Atrial fibrillation IDs
+        no_list = list(
+            data_list[np.where(data_list[:, 0] == 3)][:, 1]
+        )  # Normal ECG IDs
             
         train_ids = (
             sb_list[: int(a * len(sb_list))]
             + st_list[: int(a * len(st_list))]
-            # + af_list[: int(a * len(af_list))]
-            # + no_list[: int(a * len(no_list))]
+            + af_list[: int(a * len(af_list))]
+            + no_list[: int(a * len(no_list))]
         )
         val_ids = (
             sb_list[int(a * len(sb_list)) : int(b * len(sb_list))]
             + st_list[int(a * len(st_list)) : int(b * len(st_list))]
-            # + af_list[int(a * len(af_list)) : int(b * len(af_list))]
-            # + no_list[int(a * len(no_list)) : int(b * len(no_list))]
+            + af_list[int(a * len(af_list)) : int(b * len(af_list))]
+            + no_list[int(a * len(no_list)) : int(b * len(no_list))]
         )
         test_ids = (
             sb_list[int(b * len(sb_list)) :]
             + st_list[int(b * len(st_list)) :]
-            # + af_list[int(b * len(af_list)) :]
-            # + no_list[int(b * len(no_list)) :]
+            + af_list[int(b * len(af_list)) :]
+            + no_list[int(b * len(no_list)) :]
         )
 
         return train_ids, val_ids, test_ids
