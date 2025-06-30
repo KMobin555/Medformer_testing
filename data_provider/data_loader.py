@@ -423,6 +423,7 @@ class PTBLoader(Dataset):
             hc_list[int(a * len(hc_list)) : int(b * len(hc_list))]
             + my_list[int(a * len(my_list)) : int(b * len(my_list))]
         )
+        b=0.95
         test_ids = hc_list[int(b * len(hc_list)) :] + my_list[int(b * len(my_list)) :]
 
         return train_ids, val_ids, test_ids
