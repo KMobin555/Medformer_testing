@@ -182,21 +182,23 @@ class Model(nn.Module):
     ):
         super().__init__()
         
-        self.input_size = input_size
-        self.sequence_length = sequence_length
+        self.input_size = configs.enc_in
+        self.sequence_length = configs.seq_len
         self.d_model = d_model
         self.num_classes = configs.num_class
+
+        d_model = self.d_model
         
         # Input embedding
-        self.input_embedding = nn.Linear(input_size, d_model)
+        self.input_embedding = nn.Linear(self.input_size, self.d_model)
         
         # Positional encoding
-        self.pos_encoding = nn.Parameter(torch.randn(1, sequence_length, d_model) * 0.02)
+        self.pos_encoding = nn.Parameter(torch.randn(1, self.sequence_length, self.d_model) * 0.02)
         
         # Mamba-2 layers
         self.layers = nn.ModuleList([
             Mamba2Block(
-                d_model=d_model,
+                d_model=self.d_model,
                 d_state=d_state,
                 d_head=d_head,
                 num_heads=num_heads,
@@ -206,7 +208,7 @@ class Model(nn.Module):
         ])
         
         # Final normalization
-        self.final_norm = nn.LayerNorm(d_model)
+        self.final_norm = nn.LayerNorm(self.d_model)
         
         # Classification head
         self.classifier = nn.Sequential(
