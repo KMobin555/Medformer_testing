@@ -385,7 +385,7 @@ class PTBLoader(Dataset):
         self.data_path = os.path.join(root_path, "Feature/")
         self.label_path = os.path.join(root_path, "Label/label.npy")
 
-        a, b = 0.055, 0.07
+        a, b = 0.55, 0.7
 
         # list of IDs for training, val, and test sets
         self.train_ids, self.val_ids, self.test_ids = self.load_train_val_test_list(
@@ -417,6 +417,8 @@ class PTBLoader(Dataset):
         my_list = list(
             data_list[np.where(data_list[:, 0] == 1)][:, 1]
         )  # Myocardial infarction IDs
+
+        a, b = 0.055, 0.07
 
         train_ids = hc_list[: int(a * len(hc_list))] + my_list[: int(a * len(my_list))]
         val_ids = (
