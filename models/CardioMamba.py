@@ -217,7 +217,7 @@ class Model(nn.Module):
             nn.Linear(d_model // 2, d_model // 4),
             nn.GELU(),
             nn.Dropout(dropout),
-            nn.Linear(d_model // 4, num_classes)
+            nn.Linear(d_model // 4, self.num_classes)
         )
         
         # Initialize weights
