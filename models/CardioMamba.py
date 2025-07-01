@@ -171,12 +171,12 @@ class Model(nn.Module):
         configs,
         input_size: int = 12,  # 12-lead ECG
         sequence_length: int = 300,
-        d_model: int = 256,
-        d_state: int = 64,
-        d_head: int = 64,
+        d_model: int = 128,
+        d_state: int = 8,
+        d_head: int = 8,
         num_heads: int = 4,
-        num_layers: int = 8,
-        num_classes: int = 10,  # Set to your number of classes
+        num_layers: int = 6,
+        num_classes: int = 10,  
         expand_factor: int = 2,
         dropout: float = 0.1
     ):
