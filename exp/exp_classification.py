@@ -105,6 +105,8 @@ class Exp_Classification(Exp_Basic):
             .cpu()
             .numpy()
         )
+        print("probs shape ->", probs.shape)
+        print("trues_onehot shape ->", trues_onehot.shape)
         # print(trues_onehot.shape)
         predictions = (
             torch.argmax(probs, dim=1).cpu().numpy()
