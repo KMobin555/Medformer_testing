@@ -184,7 +184,7 @@ class Model(nn.Module):
         
         self.input_size = configs.enc_in
         self.sequence_length = configs.seq_len
-        self.d_model = configs.d_model
+        self.d_model = d_model
         self.num_classes = configs.num_class
 
         d_model = self.d_model
