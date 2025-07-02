@@ -15,7 +15,8 @@ from models import (
     Medformer,
     Medixformer,
     Cardioformer,
-    CardioMamba
+    CardioMamba,
+    CardioSSM,
 )
 
 
@@ -37,7 +38,8 @@ class Exp_Basic(object):
             "Medformer": Medformer,
             "Medixformer": Medixformer,
             "Cardioformer": Cardioformer,
-            "CardioMamba": CardioMamba
+            "CardioMamba": CardioMamba,
+            "CardioSSM": CardioSSM 
         }
         self.device = self._acquire_device()
         self.model = self._build_model().to(self.device)

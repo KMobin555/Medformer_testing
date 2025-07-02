@@ -418,14 +418,14 @@ class PTBLoader(Dataset):
             data_list[np.where(data_list[:, 0] == 1)][:, 1]
         )  # Myocardial infarction IDs
 
-        # a, b = 0.055, 0.07
+        a, b = 0.055, 0.07
 
         train_ids = hc_list[: int(a * len(hc_list))] + my_list[: int(a * len(my_list))]
         val_ids = (
             hc_list[int(a * len(hc_list)) : int(b * len(hc_list))]
             + my_list[int(a * len(my_list)) : int(b * len(my_list))]
         )
-        # b=0.95
+        b=0.95
         test_ids = hc_list[int(b * len(hc_list)) :] + my_list[int(b * len(my_list)) :]
 
         return train_ids, val_ids, test_ids
