@@ -100,6 +100,7 @@ class SelectiveStateSpaceModel(nn.Module):
 
         print("X shape ",x.shape)
         print("b l n -> ", B, L, N)
+        last_state = torch.zeros(B, D, N, device=x.device, dtype=x.dtype)
         
         # Compute delta, B, C
         x_dbl = self.x_proj(x)  # (B, L, dt_rank + 2*N)
@@ -116,7 +117,7 @@ class SelectiveStateSpaceModel(nn.Module):
         print("b d n -> ", B, D, N)
         # Scan
         # last_state = torch.zeros(B, D, N, device=x.device, dtype=x.dtype)
-        last_state = torch.zeros((B, N, D), device=x.device, dtype=x.dtype)
+        # last_state = torch.zeros((B, N, D), device=x.device, dtype=x.dtype)
         ys = []
         for i in range(L):
             last_state = deltaA[:, i] * last_state + deltaB_u[:, i]  # (B, d_inner, N)
