@@ -10,7 +10,7 @@ import numpy as np
 
 from layers.Embed import ListPatchEmbedding
 from layers.CardioSSM_EncDec import Encoder, EncoderLayerMamba
-from layers.SelectiveSSM_CardioSSM import CardioformerMambaLayer
+from layers.SelectiveSSM_CardioSSM import CardioMambaLayer
 
 # Modified main model file - replace your Model class with this
 class Model(nn.Module):
@@ -50,7 +50,7 @@ class Model(nn.Module):
         self.encoder = Encoder(
             [
                 EncoderLayerMamba(
-                    CardioformerMambaLayer(
+                    CardioMambaLayer(
                         len(patch_len_list),
                         configs.d_model,
                         d_state=getattr(configs, 'd_state', 8),

@@ -159,7 +159,7 @@ class MambaLayer(nn.Module):
         return x, None  # Return None for attention weights compatibility
 
 
-class CardioformerMambaLayer(nn.Module):
+class CardioMambaLayer(nn.Module):
     """
     Modified Cardioformer layer using Mamba instead of attention
     """
