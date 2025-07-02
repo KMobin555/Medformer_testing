@@ -110,7 +110,8 @@ class SelectiveStateSpaceModel(nn.Module):
         deltaB_u = torch.einsum('bld,bln,bld->bldn', delta, B, x)  # (B, L, d_inner, N)
         
         # Scan
-        last_state = torch.zeros(B, D, N, device=x.device, dtype=x.dtype)
+        # last_state = torch.zeros(B, D, N, device=x.device, dtype=x.dtype)
+        last_state = torch.zeros((B, D, N), device=x.device, dtype=x.dtype)
         ys = []
         for i in range(L):
             last_state = deltaA[:, i] * last_state + deltaB_u[:, i]  # (B, d_inner, N)
