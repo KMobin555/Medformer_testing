@@ -53,7 +53,7 @@ class Model(nn.Module):
                     CardioformerMambaLayer(
                         len(patch_len_list),
                         configs.d_model,
-                        d_state=getattr(configs, 'd_state', 16),
+                        d_state=getattr(configs, 'd_state', 8),
                         d_conv=getattr(configs, 'd_conv', 4),
                         expand_factor=getattr(configs, 'expand_factor', 2),
                         dropout=configs.dropout,
