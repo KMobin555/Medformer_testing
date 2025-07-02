@@ -13,13 +13,13 @@ from layers.CardioSSM_EncDec import Encoder, EncoderLayerMamba
 from layers.SelectiveSSM_CardioSSM import CardioformerMambaLayer
 
 # Modified main model file - replace your Model class with this
-class CardioformerMamba(nn.Module):
+class Model(nn.Module):
     """
     Cardioformer with Mamba (SSM) instead of attention mechanism
     Everything else remains the same including patch embedding
     """
     def __init__(self, configs):
-        super(CardioformerMamba, self).__init__()
+        super(Model, self).__init__()
         self.task_name = configs.task_name
         self.pred_len = configs.pred_len
         self.output_attention = configs.output_attention
