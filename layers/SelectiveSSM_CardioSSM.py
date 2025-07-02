@@ -96,6 +96,10 @@ class SelectiveStateSpaceModel(nn.Module):
         """
         B, L, D = x.shape
         N = self.d_state
+
+
+        print("X shape ",x.shape)
+        print("b l n -> ", B, L, N)
         
         # Compute delta, B, C
         x_dbl = self.x_proj(x)  # (B, L, dt_rank + 2*N)
